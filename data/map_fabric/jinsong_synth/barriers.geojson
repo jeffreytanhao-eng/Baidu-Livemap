@@ -1,0 +1,25 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.47069201110406,
+      39.87021087418041
+     ],
+     [
+      116.47069201110406,
+      39.89898912581959
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "motorway",
+    "name": "东四环路"
+   }
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+# 可选附录：仅供已安装 Docker 的评委一键起服务。
+# 本文件【不是】验收必选项——本地主路径见 README「本地四步启动」（venv + npm，不依赖 Docker）。
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env          # AK 从本地 .env 注入，不进镜像
+    environment:
+      - CACHE_DIR=/app/.cache
+      - FABRIC_ROOT=/app/data/map_fabric
+      - SAMPLES_DIR=/app/data/samples
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: http://localhost:8000
+        NEXT_PUBLIC_BAIDU_JS_AK: ${NEXT_PUBLIC_BAIDU_JS_AK:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api

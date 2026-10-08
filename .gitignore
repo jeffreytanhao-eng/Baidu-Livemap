@@ -1,0 +1,45 @@
+# secrets
+.env
+.env*.local
+apps/web/.env.local
+*.ak
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+# node
+node_modules/
+.next/
+.next-e2e/
+out/
+test-results/
+playwright-report/
+# cache & build
+.cache/
+dist/
+*.egg-info/
+# data：Geofabrik 原始 OSM 抽取（北京 35 MB / 上海 25 MB / 广东 165 MB）
+# 仅用于离线重切底图，体积超出 GitHub 单文件上限，不进 Git（见 README 目录结构）
+data/*.osm.pbf
+# 六环 lite 底图（~34MB，生成物，可由 PBF + import_osm_fabric.py --ring6 --lite 重建）
+data/map_fabric/beijing6r/
+# 六环全量裁片（~78MB，切片源）与 4km 网格片（~308MB，251 片）
+# 均为生成物：import_osm_fabric.py --ring6 → tile_fabric.py，不进 Git
+data/map_fabric/tmp_full6r/
+data/map_fabric/b6r_*/
+# os
+.DS_Store
+Thumbs.db
+# logs
+*.log
+# 本地数据导入工具与临时产物——不进 Git
+scripts/*_communities.py
+scripts/*_solver.py
+scripts/_tmp_probe_*.out.json
+/probe*.py
+data/*_cookies.json
+logs/
+# 本地过程文档（不进 Git）
+.trae/documents/
