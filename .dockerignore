@@ -1,0 +1,7 @@
+.venv
+**/.venv
+.cache
+.git
+node_modules
+apps/web
+.env

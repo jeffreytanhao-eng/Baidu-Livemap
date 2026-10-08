@@ -1,0 +1,1423 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.992128101691804
+     ],
+     [
+      116.2983946919721,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.96951019454413
+     ],
+     [
+      116.2983946919721,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3001552227749,
+      39.992128101691804
+     ],
+     [
+      116.3001552227749,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3001552227749,
+      39.96951019454413
+     ],
+     [
+      116.3001552227749,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30191575357769,
+      39.992128101691804
+     ],
+     [
+      116.30191575357769,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30191575357769,
+      39.96951019454413
+     ],
+     [
+      116.30191575357769,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30367628438047,
+      39.992128101691804
+     ],
+     [
+      116.30367628438047,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30367628438047,
+      39.96951019454413
+     ],
+     [
+      116.30367628438047,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30543681518327,
+      39.992128101691804
+     ],
+     [
+      116.30543681518327,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30543681518327,
+      39.96951019454413
+     ],
+     [
+      116.30543681518327,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30719734598605,
+      39.992128101691804
+     ],
+     [
+      116.30719734598605,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30719734598605,
+      39.96951019454413
+     ],
+     [
+      116.30719734598605,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30895787678884,
+      39.992128101691804
+     ],
+     [
+      116.30895787678884,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30895787678884,
+      39.96951019454413
+     ],
+     [
+      116.30895787678884,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31071840759164,
+      39.992128101691804
+     ],
+     [
+      116.31071840759164,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31071840759164,
+      39.96951019454413
+     ],
+     [
+      116.31071840759164,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31247893839442,
+      39.992128101691804
+     ],
+     [
+      116.31247893839442,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31247893839442,
+      39.99149857743719
+     ],
+     [
+      116.31247893839442,
+      39.992128101691804
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential",
+    "bridge": "yes",
+    "name": "跨河桥"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31247893839442,
+      39.96951019454413
+     ],
+     [
+      116.31247893839442,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31423946919722,
+      39.992128101691804
+     ],
+     [
+      116.31423946919722,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31423946919722,
+      39.96951019454413
+     ],
+     [
+      116.31423946919722,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.316,
+      39.992128101691804
+     ],
+     [
+      116.316,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "secondary",
+    "name": "中关村大街"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.316,
+      39.96951019454413
+     ],
+     [
+      116.316,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "secondary",
+    "name": "中关村大街"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31776053080279,
+      39.992128101691804
+     ],
+     [
+      116.31776053080279,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31776053080279,
+      39.99149857743719
+     ],
+     [
+      116.31776053080279,
+      39.992128101691804
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential",
+    "bridge": "yes",
+    "name": "跨河桥"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31776053080279,
+      39.96951019454413
+     ],
+     [
+      116.31776053080279,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31952106160558,
+      39.992128101691804
+     ],
+     [
+      116.31952106160558,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31952106160558,
+      39.96951019454413
+     ],
+     [
+      116.31952106160558,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32128159240837,
+      39.992128101691804
+     ],
+     [
+      116.32128159240837,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32128159240837,
+      39.96951019454413
+     ],
+     [
+      116.32128159240837,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32304212321117,
+      39.992128101691804
+     ],
+     [
+      116.32304212321117,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32304212321117,
+      39.96951019454413
+     ],
+     [
+      116.32304212321117,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32480265401395,
+      39.992128101691804
+     ],
+     [
+      116.32480265401395,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32480265401395,
+      39.96951019454413
+     ],
+     [
+      116.32480265401395,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32656318481673,
+      39.992128101691804
+     ],
+     [
+      116.32656318481673,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32656318481673,
+      39.96951019454413
+     ],
+     [
+      116.32656318481673,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32832371561953,
+      39.992128101691804
+     ],
+     [
+      116.32832371561953,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32832371561953,
+      39.96951019454413
+     ],
+     [
+      116.32832371561953,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.33008424642232,
+      39.992128101691804
+     ],
+     [
+      116.33008424642232,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.33008424642232,
+      39.96951019454413
+     ],
+     [
+      116.33008424642232,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3318447772251,
+      39.992128101691804
+     ],
+     [
+      116.3318447772251,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3318447772251,
+      39.96951019454413
+     ],
+     [
+      116.3318447772251,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3336053080279,
+      39.992128101691804
+     ],
+     [
+      116.3336053080279,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.3336053080279,
+      39.96951019454413
+     ],
+     [
+      116.3336053080279,
+      39.99149857743719
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.96951019454413
+     ],
+     [
+      116.3336053080279,
+      39.96951019454413
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.970859175089714
+     ],
+     [
+      116.3336053080279,
+      39.970859175089714
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.9722081556353
+     ],
+     [
+      116.3336053080279,
+      39.9722081556353
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.97355713618089
+     ],
+     [
+      116.3336053080279,
+      39.97355713618089
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.97490611672647
+     ],
+     [
+      116.3336053080279,
+      39.97490611672647
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.976255097272066
+     ],
+     [
+      116.3336053080279,
+      39.976255097272066
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.97760407781765
+     ],
+     [
+      116.3336053080279,
+      39.97760407781765
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.97895305836324
+     ],
+     [
+      116.3336053080279,
+      39.97895305836324
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.980302038908825
+     ],
+     [
+      116.3336053080279,
+      39.980302038908825
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.98165101945441
+     ],
+     [
+      116.3336053080279,
+      39.98165101945441
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.983
+     ],
+     [
+      116.3336053080279,
+      39.983
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "primary",
+    "sidewalk": "yes",
+    "name": "中关村南路"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.98434898054558
+     ],
+     [
+      116.3336053080279,
+      39.98434898054558
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.98569796109117
+     ],
+     [
+      116.3336053080279,
+      39.98569796109117
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.987046941636756
+     ],
+     [
+      116.3336053080279,
+      39.987046941636756
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.98839592218234
+     ],
+     [
+      116.3336053080279,
+      39.98839592218234
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.98974490272793
+     ],
+     [
+      116.3336053080279,
+      39.98974490272793
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.99109388327352
+     ],
+     [
+      116.3336053080279,
+      39.99109388327352
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.99244286381911
+     ],
+     [
+      116.3336053080279,
+      39.99244286381911
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.993791844364694
+     ],
+     [
+      116.3336053080279,
+      39.993791844364694
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.99514082491028
+     ],
+     [
+      116.3336053080279,
+      39.99514082491028
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.2983946919721,
+      39.996489805455866
+     ],
+     [
+      116.3336053080279,
+      39.996489805455866
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "residential"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31423946919722,
+      39.9722081556353
+     ],
+     [
+      116.31423946919722,
+      39.97400679636275
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway",
+    "bridge": "yes",
+    "name": "中关村南人行天桥"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.32128159240837,
+      39.9722081556353
+     ],
+     [
+      116.32128159240837,
+      39.97400679636275
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway",
+    "bridge": "yes",
+    "name": "中关村东人行天桥"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.316,
+      39.983944286381906
+     ],
+     [
+      116.31670421232111,
+      39.983944286381906
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31740842464224,
+      39.983
+     ],
+     [
+      116.31740842464224,
+      39.98353959221823
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30895787678884,
+      39.985563063036615
+     ],
+     [
+      116.30860577062829,
+      39.985563063036615
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30790155830717,
+      39.98434898054558
+     ],
+     [
+      116.30790155830717,
+      39.98515836887294
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.31999053648633,
+      39.980302038908825
+     ],
+     [
+      116.31999053648633,
+      39.97949265058147
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30191575357769,
+      39.98772143190955
+     ],
+     [
+      116.30367628438047,
+      39.98772143190955
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.30455654978188,
+      39.98839592218234
+     ],
+     [
+      116.30455654978188,
+      39.987046941636756
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "footway"
+   }
+  }
+ ]
+}

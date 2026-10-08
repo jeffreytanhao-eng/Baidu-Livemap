@@ -1,0 +1,666 @@
+[
+  {
+    "type": "key_middle_school",
+    "name": "北京二中",
+    "aliases": [
+      "北京市第二中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京五中",
+    "aliases": [
+      "北京市第五中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "广渠门中学",
+    "aliases": [
+      "北京市广渠门中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "汇文中学",
+    "aliases": [
+      "北京汇文中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "景山学校",
+    "aliases": [
+      "北京市景山学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "东直门中学",
+    "aliases": [
+      "北京市东直门中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第一六六中学",
+    "aliases": [
+      "一六六中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第五十五中学",
+    "aliases": [
+      "五十五中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第五十中学",
+    "aliases": [
+      "五十中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第十一中学",
+    "aliases": [
+      "十一中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京四中",
+    "aliases": [
+      "北京市第四中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京八中",
+    "aliases": [
+      "北京市第八中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北师大实验中学",
+    "aliases": [
+      "北京师范大学附属实验中学",
+      "实验中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北师大二附中",
+    "aliases": [
+      "二附中",
+      "北京师范大学第二附属中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第十五中学",
+    "aliases": [
+      "十五中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第三十五中学",
+    "aliases": [
+      "三十五中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第十三中学",
+    "aliases": [
+      "十三中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第十四中学",
+    "aliases": [
+      "十四中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第一六一中学",
+    "aliases": [
+      "一六一中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市铁路第二中学",
+    "aliases": [
+      "铁二中",
+      "铁路第二中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市回民学校",
+    "aliases": [
+      "回民学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京育才学校",
+    "aliases": [
+      "育才学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "人大附中",
+    "aliases": [
+      "中国人民大学附属中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北大附中",
+    "aliases": [
+      "北京大学附属中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "清华附中",
+    "aliases": [
+      "清华大学附属中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "首师大附中",
+    "aliases": [
+      "首都师范大学附属中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京一零一中学",
+    "aliases": [
+      "101中学",
+      "一零一中学",
+      "北京市第一零一中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "十一学校",
+    "aliases": [
+      "北京市十一学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市八一学校",
+    "aliases": [
+      "八一学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市中关村中学",
+    "aliases": [
+      "中关村中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京理工大学附属中学",
+    "aliases": [
+      "理工附中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京交通大学附属中学",
+    "aliases": [
+      "交大附中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第二十中学",
+    "aliases": [
+      "二十中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市育英学校",
+    "aliases": [
+      "育英学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "中央民族大学附属中学",
+    "aliases": [
+      "民大附中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第八十中学",
+    "aliases": [
+      "八十中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市日坛中学",
+    "aliases": [
+      "日坛中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市陈经纶中学",
+    "aliases": [
+      "陈经纶中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京工业大学附属中学",
+    "aliases": [
+      "工大附中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京乐成学校",
+    "aliases": [
+      "乐成学校"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市和平街第一中学",
+    "aliases": [
+      "和平街一中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第九十四中学",
+    "aliases": [
+      "九十四中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第十二中学",
+    "aliases": [
+      "北京十二中",
+      "十二中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "潞河中学",
+    "aliases": [
+      "北京市通州区潞河中学"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市牛栏山第一中学",
+    "aliases": [
+      "牛栏山一中"
+    ]
+  },
+  {
+    "type": "key_middle_school",
+    "name": "北京市第九中学",
+    "aliases": [
+      "北京九中"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "北京市第二实验小学",
+    "aliases": [
+      "实验二小",
+      "第二实验小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "育民小学",
+    "aliases": [
+      "北京市西城区育民小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "宏庙小学",
+    "aliases": [
+      "北京市西城区宏庙小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "黄城根小学",
+    "aliases": [
+      "北京市西城区黄城根小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "奋斗小学",
+    "aliases": [
+      "北京市西城区奋斗小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "史家小学",
+    "aliases": [
+      "史家教育集团",
+      "史家胡同小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "府学胡同小学",
+    "aliases": [
+      "府学小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "光明小学",
+    "aliases": [
+      "北京市东城区光明小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "北京第一师范学校附属小学",
+    "aliases": [
+      "一师附小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "中关村第一小学",
+    "aliases": [
+      "中关村一小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "中关村第二小学",
+    "aliases": [
+      "中关村二小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "中关村第三小学",
+    "aliases": [
+      "中关村三小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "中国人民大学附属小学",
+    "aliases": [
+      "人大附小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "北京大学附属小学",
+    "aliases": [
+      "北大附小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "清华大学附属小学",
+    "aliases": [
+      "清华附小"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "五一小学",
+    "aliases": [
+      "北京市海淀区五一小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "翠微小学",
+    "aliases": [
+      "北京市海淀区翠微小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "芳草地国际学校",
+    "aliases": [
+      "芳草地小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "北京市朝阳区实验小学",
+    "aliases": [
+      "朝阳实验小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "白家庄小学",
+    "aliases": [
+      "北京市朝阳区白家庄小学"
+    ]
+  },
+  {
+    "type": "key_primary",
+    "name": "呼家楼中心小学",
+    "aliases": [
+      "呼家楼中心校"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京协和医院",
+    "aliases": [
+      "协和医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京同仁医院",
+    "aliases": [
+      "同仁医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京医院",
+    "aliases": [
+      "卫生部北京医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京友谊医院",
+    "aliases": [
+      "友谊医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京天坛医院",
+    "aliases": [
+      "天坛医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学宣武医院",
+    "aliases": [
+      "宣武医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京安贞医院",
+    "aliases": [
+      "安贞医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京朝阳医院",
+    "aliases": [
+      "朝阳医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "中日友好医院",
+    "aliases": []
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京大学第一医院",
+    "aliases": [
+      "北大医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京大学人民医院",
+    "aliases": [
+      "人民医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京大学第三医院",
+    "aliases": [
+      "北医三院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京大学口腔医院",
+    "aliases": [
+      "北大口腔"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都儿科研究所附属儿童医院",
+    "aliases": [
+      "儿研所",
+      "首都儿科研究所"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京儿童医院",
+    "aliases": [
+      "北京儿童医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京妇产医院",
+    "aliases": [
+      "北京妇产医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京安定医院",
+    "aliases": [
+      "安定医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京地坛医院",
+    "aliases": [
+      "地坛医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京佑安医院",
+    "aliases": [
+      "佑安医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京积水潭医院",
+    "aliases": [
+      "积水潭医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "首都医科大学附属北京世纪坛医院",
+    "aliases": [
+      "世纪坛医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "中国中医科学院西苑医院",
+    "aliases": [
+      "西苑医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "中国中医科学院望京医院",
+    "aliases": [
+      "望京医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "中国中医科学院广安门医院",
+    "aliases": [
+      "广安门医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "北京清华长庚医院",
+    "aliases": [
+      "清华长庚医院"
+    ]
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "民航总医院",
+    "aliases": []
+  },
+  {
+    "type": "sanjia_hospital",
+    "name": "解放军总医院",
+    "aliases": [
+      "301医院",
+      "中国人民解放军总医院"
+    ]
+  }
+]

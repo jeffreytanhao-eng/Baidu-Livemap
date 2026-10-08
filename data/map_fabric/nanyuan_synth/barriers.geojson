@@ -1,0 +1,25 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      116.40180529027144,
+      39.79671155381668
+     ],
+     [
+      116.40180529027144,
+      39.82728844618332
+     ]
+    ]
+   },
+   "properties": {
+    "highway": "motorway",
+    "name": "南中轴路"
+   }
+  }
+ ]
+}
