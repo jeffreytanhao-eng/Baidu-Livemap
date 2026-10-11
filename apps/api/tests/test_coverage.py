@@ -11,6 +11,7 @@ from app.coverage import (
     compute_coverage,
     select_within_pois,
     set_hot_index_for_tests,
+    synthesize_public_pois,
 )
 
 
@@ -157,7 +158,7 @@ def test_attach_walk_minutes_green_area_arrival():
 
     # 有 green：面口径生效——A 距外扩面（GAP_MERGE_M=15，buffer 圆弧角点
     # 沿 45° 方向恰好外扩 15m）≈ 126m，/70 ≈ 1.8 分钟
-    out = attach_walk_minutes(graph, costs, pois, center_wgs, 15, [green_poly])
+    out = attach_walk_minutes(graph, costs, pois, center_wgs, 15, [(green_poly, {})])
     v = out[0]
     assert "estimated" not in v
     assert v["edgeArrival"] is True  # 面口径命中必标，跳过百度校准
@@ -165,6 +166,57 @@ def test_attach_walk_minutes_green_area_arrival():
     assert abs(v["walkMinutes"] - expected) <= 0.1
     assert v["walkMinutes"] < plain[0]["walkMinutes"]  # 面口径显著优于直线估算
     assert v["within"] is True
+
+
+def test_synthesize_public_pois():
+    """OSM green 面回填 public：命名公园面合成 POI（百度无本体条目的
+    红领巾公园类缺口兜底）；pitch/碎片面/无名面/半径外/非公共名称剔除；
+    不带 uid → clean_pois 对百度同名近距条目去重。"""
+    from geo.coords import LocalProjection
+    from geo.graph import WalkGraph
+    from shapely.geometry import Polygon
+
+    proj = LocalProjection(116.46, 39.88)
+    graph = WalkGraph(nodes=[(0.0, 0.0)], edges=[], adj=[[]], proj=proj, _grid={(0, 0): [0]})
+    center_wgs = proj.to_lnglat(0.0, 0.0)
+
+    park = Polygon([(100, 100), (900, 100), (900, 900), (100, 900)])
+    pitch = Polygon([(2000, 2000), (2100, 2000), (2100, 2100), (2000, 2100)])
+    tiny = Polygon([(1500, 0), (1510, 0), (1510, 10), (1500, 10)])
+    far = Polygon([(5000, 0), (5600, 0), (5600, 600), (5000, 600)])
+    near = Polygon([(0, 1200), (400, 1200), (400, 1600), (0, 1600)])
+    greens = [
+        (park, {"name": "红领巾公园", "leisure": "park"}),
+        (pitch, {"name": "十里堡足球场", "leisure": "pitch"}),
+        (tiny, {"name": "街角绿地", "leisure": "park"}),
+        (far, {"name": "远郊公园", "leisure": "park"}),
+        (near, {"name": "", "leisure": "park"}),
+        (near, {"name": "健一公馆", "leisure": "park"}),
+        (near, {"name": "京城梨园", "leisure": "park"}),
+    ]
+    out = synthesize_public_pois(greens, graph, center_wgs, 1500.0)
+    names = [p["name"] for p in out]
+    assert "红领巾公园" in names and "京城梨园" in names  # 以「园」结尾的真公园
+    assert "十里堡足球场" not in names  # pitch 剔除
+    assert "街角绿地" not in names  # <400m² 碎片
+    assert "远郊公园" not in names  # 面到中心距离 > 半径
+    assert "健一公馆" not in names  # 名称不含公共空间核心词
+    assert "" not in names
+    assert all(p["category"] == "public" and "uid" not in p for p in out)
+    ids = [p["id"] for p in out]
+    assert len(ids) == len(set(ids))
+
+    # 百度已召回同名条目（<30m）时绿色回填不重复计数
+    baidu_first = {
+        "id": "bd-1",
+        "uid": "bd-1",
+        "name": "红领巾公园",
+        "category": "public",
+        "lng": out[0]["lng"] + 1e-5,
+        "lat": out[0]["lat"],
+    }
+    kept = [p for p in clean_pois([baidu_first, *out]) if p["name"] == "红领巾公园"]
+    assert len(kept) == 1 and kept[0]["id"] == "bd-1"
 
 
 def test_calibrate_skips_edge_arrival():

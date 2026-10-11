@@ -80,15 +80,23 @@ export default function ReportPanel({
   onMoreInfo?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const [hoverCat, setHoverCat] = useState<{ id: PoiCategory; x: number; y: number } | null>(
-    null,
-  );
+  const [hoverCat, setHoverCat] = useState<
+    { id: PoiCategory; x: number; y: number; pinned: boolean } | null
+  >(null);
+  // 悬停显示浮层；固定（pinned）后位置冻结、移出不隐藏
   const openCat = (id: PoiCategory, x: number, y: number) => {
-    setHoverCat({ id, x, y });
+    setHoverCat((p) => (p?.pinned ? p : { id, x, y, pinned: false }));
+  };
+  // 点击类别行：固定/切换；再次点击同一行解除固定（回到悬停跟随）
+  const pinCat = (id: PoiCategory, x: number, y: number) => {
+    setHoverCat((p) =>
+      p && p.pinned && p.id === id ? { ...p, pinned: false } : { id, x, y, pinned: true },
+    );
   };
 
-  // 悬停期间的全局监听：指针移到「类别行 + 浮层」之外立即隐藏（纯悬停，点击不再固定）
+  // 未固定时：指针移到「类别行 + 浮层」之外立即隐藏；固定时仅 Esc 关闭
   const hoverOpen = hoverCat != null;
+  const pinned = hoverCat?.pinned ?? false;
   useEffect(() => {
     if (!hoverOpen) return;
     const inScope = (t: EventTarget | null) => {
@@ -100,14 +108,19 @@ export default function ReportPanel({
       );
     };
     const onMove = (e: MouseEvent) => {
-      if (inScope(e.target)) return;
+      if (pinned || inScope(e.target)) return;
       setHoverCat(null);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setHoverCat(null);
+    };
     window.addEventListener("mousemove", onMove);
+    window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("keydown", onKey);
     };
-  }, [hoverOpen]);
+  }, [hoverOpen, pinned]);
 
   // 新结果到达时关闭浮层
   useEffect(() => {
@@ -379,13 +392,16 @@ export default function ReportPanel({
                   <tr
                     key={c.id}
                     data-cat-row
-                    className="cursor-default border-b border-slate-50 last:border-0"
+                    className="cursor-pointer border-b border-slate-50 last:border-0"
                     onMouseEnter={(e) => openCat(c.id, e.clientX, e.clientY)}
                     onMouseMove={(e) =>
                       setHoverCat((p) =>
-                        p && p.id === c.id ? { ...p, x: e.clientX, y: e.clientY } : p,
+                        p && !p.pinned && p.id === c.id
+                          ? { ...p, x: e.clientX, y: e.clientY }
+                          : p,
                       )
                     }
+                    onClick={(e) => pinCat(c.id, e.clientX, e.clientY)}
                   >
                     <td className="whitespace-nowrap py-1 pl-3 pr-2 text-slate-700">
                       <span
@@ -478,6 +494,8 @@ export default function ReportPanel({
             y={hoverCat.y}
             result={result}
             onPick={onPoiClick}
+            pinned={hoverCat.pinned}
+            onClose={() => setHoverCat(null)}
           />,
           document.body
         )}
@@ -499,12 +517,16 @@ function PoiHoverCard({
   y,
   result,
   onPick,
+  pinned,
+  onClose,
 }: {
   catId: PoiCategory;
   x: number;
   y: number;
   result: CheckupResponse;
   onPick?: (poi: Poi) => void;
+  pinned?: boolean;
+  onClose?: () => void;
 }) {
   const cat = result.coverage.categories.find((c) => c.id === catId);
   // 所有类别只显示圈内（与「数量」列同口径）；排序已按步行分钟
@@ -531,7 +553,18 @@ function PoiHoverCard({
       <div className="flex items-center justify-between border-b border-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
         <span>
           {cat.name} · {withinCountText(cat.withinCount, cat.count)} 处
+          {pinned && <span className="ml-1.5 text-[10px] font-normal text-slate-400">已固定</span>}
         </span>
+        {pinned && (
+          <button
+            type="button"
+            className="-mr-1 rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            title="关闭（Esc）"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        )}
       </div>
       {/* 列说明表头：设施名 / 距离 / 步行时间（全部左对齐；只显示圈内，无范围列） */}
       <div className="grid grid-cols-[minmax(0,1fr)_54px_64px] gap-1.5 border-b border-slate-100 px-3 pb-1 pt-1.5 text-[10px] font-medium text-slate-400">
@@ -555,7 +588,7 @@ function PoiHoverCard({
             >
               <button
                 type="button"
-                className={`min-w-0 truncate text-left hover:underline ${
+                className={`min-w-0 truncate text-left underline underline-offset-2 ${
                   hotName
                     ? "font-semibold text-amber-700"
                     : "text-slate-700 hover:text-brand"

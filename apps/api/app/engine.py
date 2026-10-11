@@ -65,8 +65,10 @@ class RegionBundle:
     # 启动期预融合的障碍物并集（walls+water）：fast/full 请求路径直接 difference，
     # 避免每次请求对数千墙厚区重新 unary_union（真实 OSM 建筑下是主要耗时）
     obstacles: BaseGeometry | None = None
-    # green 面（公园/绿地等，本地米坐标）：POI 面感知「边缘到达」用
-    green: list[BaseGeometry] = field(default_factory=list)
+    # green 面（公园/绿地等，本地米坐标）：POI 面感知「边缘到达」用；
+    # 附带 OSM 属性（name/leisure 等）供 public 类 POI 回填（百度 place 对
+    # 部分公园只有子设施 POI、无本体条目，见 coverage.synthesize_public_pois）
+    green: list[tuple[BaseGeometry, dict]] = field(default_factory=list)
 
 
 @dataclass
@@ -122,7 +124,7 @@ def _build_bundle(
     barrier_labels = [
         (g, str(props.get("name") or "快速路")) for g, props in layers.barriers if not g.is_empty
     ]
-    green = [g for g, _ in layers.green if not g.is_empty]
+    green = [(g, props) for g, props in layers.green if not g.is_empty]
     enterable = [
         b.geometry for b in classified if b.category == CATEGORY_ENTERABLE and not b.geometry.is_empty
     ]

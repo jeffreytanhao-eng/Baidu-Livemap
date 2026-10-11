@@ -55,6 +55,7 @@ from .coverage import (
     clean_pois,
     compute_coverage,
     select_within_pois,
+    synthesize_public_pois,
 )
 from .demo_data import (
     JINSONG_DEMO_ROUTES,
@@ -88,7 +89,7 @@ _DIR_ANGLE = {
 _REGION_DENSITY = {"jinsong": 1.0, "zhongguancun": 1.4, "nanyuan": 0.65}
 
 # 结果缓存 schema 版本：分类体系等响应结构变化时 +1，旧缓存自然失配
-CACHE_SCHEMA = "cat13"  # 13：类别更名（医疗养老/商超购物）+ health 扩词表（旧缓存名/词表失效）
+CACHE_SCHEMA = "cat14"  # 14：OSM green 命名公园面回填 public POI（红领巾公园类缺口，旧缓存无回填结果）
 
 # 演示快照精确档位之外的分钟，统一回退到 15 分钟快照
 _SNAPSHOT_FALLBACK_MINUTES = 15
@@ -301,6 +302,10 @@ async def _fetch_pois(
                         else:
                             poi["transportKind"] = kind
                     raw.append(poi)
+            # OSM green 命名公园面回填 public：百度 place 对部分公园（实测
+            # 红领巾公园）只有子设施 POI、数据源头无本体条目，检索词救不回；
+            # 不带 uid → clean_pois 按「名称+30m」对百度已召回条目去重
+            raw.extend(synthesize_public_pois(bundle.green, bundle.graph, center_wgs, radius))
             return clean_pois(raw), True
     seed = f"{geohash5(*center_wgs)}|{bundle.name}"
     density = _REGION_DENSITY.get(bundle.name, 1.0)

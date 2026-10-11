@@ -245,7 +245,7 @@ def attach_walk_minutes(
     pois: list[dict[str, Any]],
     center_wgs: tuple[float, float],
     minutes: int,
-    green: list[BaseGeometry] | tuple[BaseGeometry, ...] = (),
+    green: list[tuple[BaseGeometry, dict]] | tuple[tuple[BaseGeometry, dict], ...] = (),
 ) -> list[dict[str, Any]]:
     """POI 步行分钟：以**边缘到达**为标准。
 
@@ -263,7 +263,7 @@ def attach_walk_minutes(
     ``edgeArrival=true``（时间到边即止，同样跳过百度校准）。返回元素带
     内部键 ``_raw``（图上分钟，不可达为 None）与 ``_wgs``，序列化前剔除。
     """
-    green_list = [g for g in green if not g.is_empty]
+    green_list = [g for g, _props in green if not g.is_empty]
     green_tree = STRtree(green_list) if green_list else None
     out: list[dict[str, Any]] = []
     for poi in pois:
@@ -316,6 +316,62 @@ def attach_walk_minutes(
         if poi.get("_catTotal") is not None:
             view["_catTotal"] = poi["_catTotal"]
         out.append(view)
+    return out
+
+
+# OSM green 面回填（public 类）：leisure=pitch（足球场/操场/网球场等体育
+# 设施）不属公共空间口径（体育场馆归娱乐休闲）；<400m² 的 OSM 碎片面
+# （环岛/道路绿化带误标）不回填。
+_GREEN_EXCLUDE_LEISURE = frozenset({"pitch"})
+_GREEN_MIN_AREA_M2 = 400.0
+
+
+def synthesize_public_pois(
+    green: list[tuple[BaseGeometry, dict]] | tuple[tuple[BaseGeometry, dict], ...],
+    graph: WalkGraph,
+    center_wgs: tuple[float, float],
+    radius_m: float,
+) -> list[dict[str, Any]]:
+    """OSM green 命名公园面回填 public POI（百度 place 召回缺口兜底）。
+
+    百度 place API 对部分公园（实测红领巾公园）只有门/广场/球场/公交站
+    等子设施 POI、没有「旅游景点;公园」本体条目，任何检索词组合都召不回；
+    OSM green 层的命名公园面是可靠补充。合成规则：
+
+    - 仅取**命名面**且名称命中 :data:`_PUBLIC_CORE_RE`（或以「园」结尾，
+      覆盖丁香园/京城梨园类无通名后缀的真公园）；剔除 pitch 与碎片面；
+    - 距离过滤按**面到中心的最短距离**（非质心）：大面积公园质心可在检索
+      半径外而近边在半径内，与百度 place「范围内召回」语义对齐；
+    - 坐标取面内代表点，步行耗时由 :func:`attach_walk_minutes` 面感知口径
+      计算（POI 在面内 → 到达面边界即计入，标 ``edgeArrival`` 跳过百度
+      校准——实测走到内部点位天然偏大）；
+    - **不带 uid**：clean_pois 的「名称+30m」规则对百度已召回的同类 POI
+      去重（百度条目在 raw 序列靠前、优先保留），避免双重计数。
+    """
+    out: list[dict[str, Any]] = []
+    cx, cy = graph.proj.to_xy(*center_wgs)
+    center_pt = Point(cx, cy)
+    for idx, (geom, props) in enumerate(green):
+        if str(props.get("leisure") or "") in _GREEN_EXCLUDE_LEISURE:
+            continue
+        if geom.is_empty or geom.area < _GREEN_MIN_AREA_M2:
+            continue
+        name = str(props.get("name") or "").strip()
+        if not (name and (_PUBLIC_CORE_RE.search(name) or name.endswith("园"))):
+            continue
+        if geom.distance(center_pt) > radius_m:
+            continue
+        rep = geom.representative_point()
+        lng, lat = graph.proj.to_lnglat(rep.x, rep.y)
+        out.append(
+            {
+                "id": f"osm-green-{idx}",
+                "name": name,
+                "category": "public",
+                "lng": lng,
+                "lat": lat,
+            }
+        )
     return out
 
 
