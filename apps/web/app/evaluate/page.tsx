@@ -36,6 +36,7 @@ const DEFAULT_VISIBILITY: LayerVisibility = {
   water: true,
   barriers: true,
   pois: true,
+  blindSpots: true,
   straightCircle: false,
   baiduRoutes: false,
   idw: false,

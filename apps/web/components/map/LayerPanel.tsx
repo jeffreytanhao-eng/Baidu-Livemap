@@ -12,6 +12,7 @@ const LAYER_ITEMS: { key: keyof LayerVisibility; label: string }[] = [
   { key: "water", label: "水域" },
   { key: "barriers", label: "快速路/阻隔" },
   { key: "pois", label: "设施点(POI)" },
+  { key: "blindSpots", label: "服务盲区(1km)" },
 ];
 
 export default function LayerPanel({
@@ -120,6 +121,12 @@ export default function LayerPanel({
               </div>
             ))}
           </div>
+          {result?.blindPoints && result.blindPoints.features.length > 0 && (
+            <div className="mt-1.5 flex items-center gap-1.5 border-t border-slate-100 pt-1.5 text-xs text-slate-600">
+              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#ef4444" }} />
+              服务盲区：1km 内缺菜市场/药店/小学（任一）
+            </div>
+          )}
         </div>
       )}
     </div>

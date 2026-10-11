@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from geo.blindspot import BLINDSPOT_RADIUS_M, BlindspotPoi, blindspots
+from geo.blindspot import (
+    BLINDSPOT_RADIUS_M,
+    BlindspotPoi,
+    blindspot_points,
+    blindspots,
+)
 from geo.coords import LocalProjection
 
 CENTER = (116.4578, 39.8846)
@@ -102,3 +107,51 @@ def test_categories_subset_filter() -> None:
 
     empty = blindspots(CENTER, pois, minutes=15, categories=())
     assert empty["features"] == [], "空子集不算任何盲区"
+
+
+def test_blindspot_points_match_polygons() -> None:
+    """点输出与面输出同口径：单类缺失时点数=面 cells 总数，标签与格心一致。"""
+    pois = _strip_pois()
+    polys = blindspots(CENTER, pois, minutes=15)
+    points = blindspot_points(CENTER, pois, minutes=15)
+    poly_cells = sum(f["properties"]["cells"] for f in polys["features"])
+    assert len(points["features"]) == poly_cells == 21
+    for feat in points["features"]:
+        assert feat["geometry"]["type"] == "Point"
+        assert feat["properties"]["missing"] == ["education"]
+        mx, my = _PROJ.to_xy(*feat["geometry"]["coordinates"])
+        assert abs(my) < 1e-6, "strip 场景缺格全部在 y=0 行"
+        assert min(abs(mx - k * 100) for k in range(-10, 11)) < 1e-6, "坐标为格心"
+
+
+def test_blindspot_points_multi_missing_and_empty() -> None:
+    """多类缺失合并到同一格心点；无缺/空子集输出空 FC；增强口径与面一致。"""
+    # 全缺布局：1km 内无任何 POI，每格 missing 为三类全并
+    far = [BlindspotPoi("convenience", *_offset(5000.0, 5000.0))]
+    full = blindspot_points(CENTER, far, minutes=15)
+    assert full["features"], "全缺时应有点"
+    for feat in full["features"]:
+        assert feat["properties"]["missing"] == ["convenience", "education", "health"]
+
+    # 增强口径与 blindspots 一致：步行 25 分钟便利设施 X=15 缺、X=30 不缺
+    pois = _strip_pois(convenience_walk=25.0)
+    cats15 = {
+        c
+        for f in blindspot_points(CENTER, pois, minutes=15, enhanced=True)["features"]
+        for c in f["properties"]["missing"]
+    }
+    cats30 = {
+        c
+        for f in blindspot_points(CENTER, pois, minutes=30, enhanced=True)["features"]
+        for c in f["properties"]["missing"]
+    }
+    assert "convenience" in cats15
+    assert "convenience" not in cats30
+
+    # 全覆盖时无点；空子集不算任何盲区
+    covered = [
+        BlindspotPoi(c, *_offset(0.0, 0.0))
+        for c in ("convenience", "health", "education")
+    ]
+    assert blindspot_points(CENTER, covered, minutes=15)["features"] == []
+    assert blindspot_points(CENTER, far, minutes=15, categories=())["features"] == []

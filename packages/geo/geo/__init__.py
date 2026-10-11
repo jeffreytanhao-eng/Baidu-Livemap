@@ -5,6 +5,7 @@ from .blindspot import (
     DEFAULT_CATEGORIES,
     GRID_CELL_M,
     BlindspotPoi,
+    blindspot_points,
     blindspots,
     blindspots_from_geojson,
 )
@@ -95,6 +96,7 @@ __all__ = [
     "WalkGraph",
     "bd09ll_to_gcj02",
     "bd09ll_to_wgs84",
+    "blindspot_points",
     "blindspots",
     "blindspots_from_geojson",
     "build_graph",

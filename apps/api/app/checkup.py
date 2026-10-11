@@ -25,6 +25,7 @@ from geo import (
     DEFAULT_CATEGORIES,
     GRID_CELL_M,
     bd09ll_to_wgs84,
+    blindspot_points,
     blindspots,
     build_isochrone,
     circle_radius_m,
@@ -89,7 +90,7 @@ _DIR_ANGLE = {
 _REGION_DENSITY = {"jinsong": 1.0, "zhongguancun": 1.4, "nanyuan": 0.65}
 
 # 结果缓存 schema 版本：分类体系等响应结构变化时 +1，旧缓存自然失配
-CACHE_SCHEMA = "cat14"  # 14：OSM green 命名公园面回填 public POI（红领巾公园类缺口，旧缓存无回填结果）
+CACHE_SCHEMA = "cat15"  # 15：新增盲区格中心点 blindPoints（旧缓存无该字段，bump 失效重算）
 
 # 演示快照精确档位之外的分钟，统一回退到 15 分钟快照
 _SNAPSHOT_FALLBACK_MINUTES = 15
@@ -370,6 +371,17 @@ def _blind_summary(blind_fc: dict) -> dict:
     }
 
 
+def _fc_to_bd09ll(fc: dict) -> dict:
+    """盲区 FC（WGS84 几何）整体转 BD09LL 展示坐标。"""
+    return {
+        "type": "FeatureCollection",
+        "features": [
+            {**f, "geometry": geometry_wgs84_to_bd09ll(f["geometry"])}
+            for f in fc.get("features", [])
+        ],
+    }
+
+
 # 百度对照折线注入成功时固定追加的诊断句
 BAIDU_COMPARE_NOTE = "与百度步行路线大体重合；本圈沿采样路网等时计算，边界更保守。"
 
@@ -647,16 +659,17 @@ def _apply_blind_filter_to_snapshot(
         enhanced=True,
         categories=tuple(blind_filter),
     )
-    blind_fc = {
-        "type": "FeatureCollection",
-        "features": [
-            {**f, "geometry": geometry_wgs84_to_bd09ll(f["geometry"])}
-            for f in blind_fc.get("features", [])
-        ],
-    }
+    blind_points_fc = blindspot_points(
+        center_wgs,
+        blind_input,
+        minutes=minutes,
+        enhanced=True,
+        categories=tuple(blind_filter),
+    )
     return {
         **snapshot,
-        "blindSpots": blind_fc,
+        "blindSpots": _fc_to_bd09ll(blind_fc),
+        "blindPoints": _fc_to_bd09ll(blind_points_fc),
         "blindSummary": _blind_summary(blind_fc),
     }
 
@@ -685,14 +698,16 @@ async def run_checkup(
     if demo_mode and allow_snapshot:
         snapshot = _load_snapshot(ctx, center_wgs, minutes)
         if snapshot is not None:
-            # 盲区筛选口径与默认复合不一致时，只重算盲区层（快照其余字段不变）
-            if (
-                phase == "full"
-                and blind_filter is not None
-                and tuple(sorted(blind_filter)) != tuple(sorted(DEFAULT_CATEGORIES))
-            ):
+            # 盲区层始终本地重算（毫秒级、零 API）：与 blindFilter 口径对齐，
+            # 并给旧快照补 blindPoints 红点层（快照其余字段不变）
+            if phase == "full":
                 snapshot = _apply_blind_filter_to_snapshot(
-                    ctx, bundle, center_wgs, minutes, snapshot, blind_filter
+                    ctx,
+                    bundle,
+                    center_wgs,
+                    minutes,
+                    snapshot,
+                    blind_filter if blind_filter is not None else list(DEFAULT_CATEGORIES),
                 )
             elapsed = round((time.perf_counter() - t0) * 1000)
             if phase == "fast":
@@ -910,13 +925,13 @@ async def run_checkup(
         enhanced=include_blind_walk,
         categories=blind_categories,
     )
-    blind_fc = {
-        "type": "FeatureCollection",
-        "features": [
-            {**f, "geometry": geometry_wgs84_to_bd09ll(f["geometry"])}
-            for f in blind_fc.get("features", [])
-        ],
-    }
+    blind_points_fc = blindspot_points(
+        center_wgs,
+        blind_input,
+        minutes=minutes,
+        enhanced=include_blind_walk,
+        categories=blind_categories,
+    )
     blind_summary = _blind_summary(blind_fc)
 
     diagnosis = _diagnosis(
@@ -989,7 +1004,8 @@ async def run_checkup(
         ],
         "coverage": coverage,
         "sectorGaps": sector_gaps,
-        "blindSpots": blind_fc,
+        "blindSpots": _fc_to_bd09ll(blind_fc),
+        "blindPoints": _fc_to_bd09ll(blind_points_fc),
         "blindSummary": blind_summary,
         "diagnosis": diagnosis,
         "straightCircle": {"radiusM": circle_radius_m(minutes)},

@@ -18,6 +18,7 @@ const DEFAULT_VISIBILITY: LayerVisibility = {
   barriers: true,
   // 关闭设施点层：地图空白处点击即选点（POI 命中会拦截选点回调）
   pois: false,
+  blindSpots: true,
   straightCircle: false,
   baiduRoutes: false,
   idw: false,

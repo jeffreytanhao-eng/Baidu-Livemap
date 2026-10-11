@@ -1,9 +1,10 @@
-"""1 km 三类（便利生活/医疗保障/学习教育）盲区灰块。
+"""1 km 三类（便利生活/医疗保障/学习教育）盲区灰块与格中心点。
 
 网格半径写死 1000m、格宽 100m，不随 X 缩放；直线口径判缺，
 增强开关「步行 >X 分钟不可达」才跟 X 走。逐类独立 4-连通聚合成区域
 （每类 missing 单标签，避免跨类并集裹挟），
 长宽比 >3 的带状区域标记 corridor=true（灰色走廊）。
+blindspot_points 输出同一口径的缺格格中心点（地图红色圆点图层用）。
 """
 
 from __future__ import annotations
@@ -42,20 +43,20 @@ def _cell_polygon(cx: float, cy: float, half: float) -> BaseGeometry:
     return box(cx - half, cy - half, cx + half, cy + half)
 
 
-def blindspots(
+def _missing_cells(
     center: tuple[float, float],
     pois: list[BlindspotPoi | dict],
-    minutes: int = 15,
-    enhanced: bool = False,
-    categories: tuple[str, ...] = DEFAULT_CATEGORIES,
-) -> dict:
-    """计算 1km 盲区灰块，输出 GeoJSON FeatureCollection。
+    minutes: int,
+    enhanced: bool,
+    categories: tuple[str, ...],
+) -> tuple[
+    LocalProjection,
+    dict[tuple[int, int], tuple[float, float]],
+    dict[tuple[int, int], set[str]],
+]:
+    """公共前置：POI 归一化投影 + 1km 网格生成 + 逐格判缺。
 
-    - 网格范围写死 1000m（不随 ``minutes``）；
-    - 每格判定「直线 1km 内无该类 POI」为缺；
-    - ``enhanced=True`` 时，提供了 walk_minutes 的 POI 还需满足 <= minutes 才算可达；
-    - 逐类 4-连通聚合缺格为区域（properties.missing 恒为单标签），
-      长宽比 >3 标记 corridor=true。
+    返回 (投影, 格心表 {(ix,iy): (cx,cy) 米}, 缺格表 {(ix,iy): {缺失类别}})。
     """
     proj = LocalProjection(*center)
     norm_pois: list[tuple[str, float, float, float | None]] = []
@@ -74,7 +75,6 @@ def blindspots(
 
     # 1) 生成覆盖 1km 圆的 100m 网格（范围与 minutes 无关）
     n = math.ceil(BLINDSPOT_RADIUS_M / GRID_CELL_M)
-    half = GRID_CELL_M / 2.0
     cells: dict[tuple[int, int], tuple[float, float]] = {}
     for ix in range(-n, n + 1):
         for iy in range(-n, n + 1):
@@ -102,6 +102,26 @@ def blindspots(
                 miss.add(cat)
         if miss:
             missing[key] = miss
+    return proj, cells, missing
+
+
+def blindspots(
+    center: tuple[float, float],
+    pois: list[BlindspotPoi | dict],
+    minutes: int = 15,
+    enhanced: bool = False,
+    categories: tuple[str, ...] = DEFAULT_CATEGORIES,
+) -> dict:
+    """计算 1km 盲区灰块，输出 GeoJSON FeatureCollection。
+
+    - 网格范围写死 1000m（不随 ``minutes``）；
+    - 每格判定「直线 1km 内无该类 POI」为缺；
+    - ``enhanced=True`` 时，提供了 walk_minutes 的 POI 还需满足 <= minutes 才算可达；
+    - 逐类 4-连通聚合缺格为区域（properties.missing 恒为单标签），
+      长宽比 >3 标记 corridor=true。
+    """
+    proj, cells, missing = _missing_cells(center, pois, minutes, enhanced, categories)
+    half = GRID_CELL_M / 2.0
 
     # 3) 逐类独立 4-连通聚合。
     # 不能把三类缺格混在一起聚合：某类全缺时会把整片连通成大区域，
@@ -150,6 +170,36 @@ def blindspots(
                     },
                 }
             )
+    return {"type": "FeatureCollection", "features": features}
+
+
+def blindspot_points(
+    center: tuple[float, float],
+    pois: list[BlindspotPoi | dict],
+    minutes: int = 15,
+    enhanced: bool = False,
+    categories: tuple[str, ...] = DEFAULT_CATEGORIES,
+) -> dict:
+    """计算 1km 盲区格中心点，输出 GeoJSON FeatureCollection。
+
+    与 :func:`blindspots` 同网格、同判缺口径，每个缺格输出一个
+    Point Feature（格中心，WGS84）：properties.missing 为该格缺失
+    类别列表（可能多类），供地图红色圆点图层逐点标注盲区位置。
+    """
+    proj, cells, missing = _missing_cells(center, pois, minutes, enhanced, categories)
+    features: list[dict] = []
+    for key, miss in missing.items():
+        cx, cy = cells[key]
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": proj.to_lnglat(cx, cy),
+                },
+                "properties": {"missing": sorted(miss)},
+            }
+        )
     return {"type": "FeatureCollection", "features": features}
 
 

@@ -69,6 +69,8 @@ function drawCone(ctx: CanvasRenderingContext2D, x: number, y: number, t: number
 
 /** POI 圆点半径（米），与原百度 Circle 保持一致。 */
 const POI_RADIUS_M = 16;
+/** 盲区红点半径（米）：略小于 100m 盲区格，格内可见且不互相重叠。 */
+const BLIND_POINT_RADIUS_M = 45;
 const NO_DASH: number[] = [];
 
 interface OpStyle {
@@ -414,6 +416,29 @@ export default function BaiduMapImpl(props: MapImplProps) {
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.setLineDash(NO_DASH);
+    }
+
+    // 服务盲区红点：1km 内缺某类设施的格中心（区域诊断层，压在 POI 之下）
+    if (p.visible.blindSpots && p.result?.blindPoints) {
+      const bWorld = (BLIND_POINT_RADIUS_M * sy) / METERS_PER_DEG_LAT;
+      const bPx = Math.max(5, bWorld);
+      for (const feat of p.result.blindPoints.features) {
+        const geom = feat.geometry;
+        if (geom.type !== "Point") continue;
+        const [blng, blat] = geom.coordinates as [number, number];
+        const x = px(blng);
+        const y = py(blat);
+        if (x < -40 || y < -40 || x > w + 40 || y > h + 40) continue;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.arc(x, y, bPx, 0, Math.PI * 2);
+        ctx.fillStyle = "#ef4444";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
 
     // POI 圆点：世界半径随缩放变化，但保证最小 4px 屏幕半径，

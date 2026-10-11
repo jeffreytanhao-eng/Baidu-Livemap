@@ -373,6 +373,27 @@ export default function SvgMapImpl(props: MapImplProps) {
             );
           })}
 
+        {/* 服务盲区红点：1km 内缺某类设施的格中心（区域诊断层，不拦截点击） */}
+        {visible.blindSpots &&
+          result?.blindPoints?.features.map((f, i) => {
+            if (f.geometry.type !== "Point") return null;
+            const [blng, blat] = f.geometry.coordinates as [number, number];
+            const m = toMeters({ lng: blng, lat: blat }, anchor);
+            return (
+              <circle
+                key={`bp${i}`}
+                cx={m.x}
+                cy={-m.y}
+                r={45}
+                fill="#ef4444"
+                fillOpacity={0.8}
+                stroke="#ffffff"
+                strokeWidth={6}
+                pointerEvents="none"
+              />
+            );
+          })}
+
         {/* POI */}
         {visible.pois &&
           result?.pois.map((p) => {
