@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 
 import pytest
-
 from geo.scoring import coverage_score, passed, search_radius
 
 CATEGORIES = {

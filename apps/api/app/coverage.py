@@ -30,19 +30,21 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import re
 from pathlib import Path
 from typing import Any
 
+from geo import coverage_score, haversine_m, passed, wgs84_to_bd09ll
+from geo.graph import WalkGraph
 from shapely import STRtree
 from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry
 
-from geo import coverage_score, haversine_m, passed, wgs84_to_bd09ll
-from geo.graph import WalkGraph
-
 from .db import normalize_name
+
+logger = logging.getLogger(__name__)
 
 CATEGORY_CONVENIENCE = "convenience"
 CATEGORY_HEALTH = "health"

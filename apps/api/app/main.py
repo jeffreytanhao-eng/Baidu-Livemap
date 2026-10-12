@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import sqlite3
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request

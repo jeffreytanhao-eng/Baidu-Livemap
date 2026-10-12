@@ -38,6 +38,7 @@ from geo import (
     wgs84_to_bd09ll,
 )
 from geo.coords import LocalProjection
+from shapely.errors import GEOSException
 from shapely.geometry import GeometryCollection, LineString, Point, mapping, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform as shp_transform
@@ -624,7 +625,7 @@ def _snapshot_main_domain(snapshot: dict) -> dict | None:
         return None
     try:
         wgs = shp_transform(lambda x, y: bd09ll_to_wgs84(x, y), shape(geom))
-    except Exception:
+    except (ValueError, TypeError, GEOSException):
         return None
     return None if wgs.is_empty else mapping(wgs)
 

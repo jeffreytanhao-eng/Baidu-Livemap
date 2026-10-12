@@ -78,7 +78,7 @@ def _domain_local(domain: dict | None, proj: LocalProjection) -> BaseGeometry | 
         return None
     try:
         geom = shape(domain)
-    except Exception:
+    except (ValueError, TypeError):
         return None
     if geom.is_empty:
         return None

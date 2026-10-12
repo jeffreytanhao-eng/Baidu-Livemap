@@ -132,11 +132,10 @@ def test_attach_walk_minutes_green_area_arrival():
     面口径按「面边界邻域节点 + 节点到面接驳」计入并标 edgeArrival。"""
     import math
 
+    from app.coverage import GAP_MERGE_M
     from geo.coords import LocalProjection
     from geo.graph import WalkGraph
     from shapely.geometry import Polygon
-
-    from app.coverage import GAP_MERGE_M
 
     proj = LocalProjection(116.46, 39.88)
     # 单节点图：A(0,0)；green 面 (100,100)-(600,600)，面边界距 A ≈141m

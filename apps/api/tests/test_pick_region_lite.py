@@ -69,7 +69,7 @@ def _ctx(tiles: object | None = None) -> _Ctx:
     )
 
 
-def _pick(lng: float, lat: int | float, tiles: object | None = None):
+def _pick(lng: float, lat: float, tiles: object | None = None):
     return asyncio.run(pick_region(_ctx(tiles=tiles), lng, lat))
 
 
