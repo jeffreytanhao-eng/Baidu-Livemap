@@ -3,12 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BUILDING_COLORS,
+  BLIND_FILL,
+  BLIND_FILL_ALPHA,
+  BLIND_HATCH,
+  BLIND_STROKE,
   POI_CATEGORY_META,
   WALK_SPEED_M_PER_MIN,
   isoColor,
 } from "@/lib/constants";
+import type { BlindHatch } from "@/lib/constants";
 import { METERS_PER_DEG_LAT, featureToRings } from "@/lib/geo";
 import type {
+  BlindCategory,
   CheckupResponse,
   FabricResponse,
   GeoFeature,
@@ -69,8 +75,6 @@ function drawCone(ctx: CanvasRenderingContext2D, x: number, y: number, t: number
 
 /** POI 圆点半径（米），与原百度 Circle 保持一致。 */
 const POI_RADIUS_M = 16;
-/** 盲区红点半径（米）：略小于 100m 盲区格，格内可见且不互相重叠。 */
-const BLIND_POINT_RADIUS_M = 45;
 const NO_DASH: number[] = [];
 
 interface OpStyle {
@@ -80,6 +84,8 @@ interface OpStyle {
   strokeAlpha?: number;
   lineWidth?: number;
   dash?: number[];
+  /** 盲区纹理：在面内裁剪后画屏幕 45° 斜线或圆点（间距恒定不随缩放变化） */
+  hatch?: BlindHatch;
 }
 
 /**
@@ -129,6 +135,72 @@ function lineOp(lines: number[][][], style: OpStyle): DrawOp | null {
     for (let i = 1; i < line.length; i++) path.lineTo(line[i][0], line[i][1]);
   }
   return { path, bbox: bboxOf(usable), ...style };
+}
+
+/** 盲区纹理的屏幕间距（px），斜线与圆点共用 */
+const HATCH_SPACING_PX = 9;
+const HATCH_DOT_RADIUS_PX = 1.6;
+const HATCH_LINE_WIDTH_PX = 1.2;
+
+/**
+ * 在当前（经纬度空间）变换下，往 op.path 裁剪区内画纹理。
+ * 斜线按 a = sx/sy 取向，保证屏幕上恰为 45°（up=↗，down=↘）；
+ * 间距/线宽/点径均按屏幕像素换算，缩放时观感恒定。
+ */
+function drawHatch(
+  ctx: CanvasRenderingContext2D,
+  bbox: [number, number, number, number],
+  hatch: BlindHatch,
+  sx: number,
+  sy: number
+) {
+  const [minLng, minLat, maxLng, maxLat] = bbox;
+  ctx.globalAlpha = 0.75;
+  ctx.strokeStyle = BLIND_STROKE;
+  ctx.fillStyle = BLIND_STROKE;
+  ctx.setLineDash(NO_DASH);
+  if (hatch === "dot") {
+    const dLng = HATCH_SPACING_PX / sx;
+    const dLat = HATCH_SPACING_PX / sy;
+    const cols = Math.ceil((maxLng - minLng) / dLng);
+    const rows = Math.ceil((maxLat - minLat) / dLat);
+    if (cols * rows > 6000) return; // 视野过远时点会糊成一片，直接跳过
+    const rx = HATCH_DOT_RADIUS_PX / sx;
+    const ry = HATCH_DOT_RADIUS_PX / sy;
+    ctx.beginPath();
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const x = minLng + (i + 0.5) * dLng;
+        const y = minLat + (j + 0.5) * dLat;
+        ctx.moveTo(x + rx, y);
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+      }
+    }
+    ctx.fill();
+    return;
+  }
+  // 斜线：up 为 lat - a*lng = c（屏幕 ↗），down 为 lat + a*lng = c（屏幕 ↘）
+  const a = sx / sy;
+  const step = (Math.SQRT2 * HATCH_SPACING_PX) / sy;
+  ctx.lineWidth = HATCH_LINE_WIDTH_PX / ((sx + sy) / 2);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  if (hatch === "up") {
+    const c0 = minLat - a * maxLng;
+    const c1 = maxLat - a * minLng;
+    for (let c = c0; c <= c1; c += step) {
+      ctx.moveTo((minLat - c) / a, minLat);
+      ctx.lineTo((maxLat - c) / a, maxLat);
+    }
+  } else {
+    const c0 = minLat + a * minLng;
+    const c1 = maxLat + a * maxLng;
+    for (let c = c0; c <= c1; c += step) {
+      ctx.moveTo((c - minLat) / a, minLat);
+      ctx.lineTo((c - maxLat) / a, maxLat);
+    }
+  }
+  ctx.stroke();
 }
 
 /** 依据当前图层开关与数据，重建全部绘制图元。 */
@@ -249,6 +321,23 @@ function buildOps(
           stroke: "#d97706",
           lineWidth: 1.5,
           dash: [8, 6],
+        })
+      );
+    }
+  }
+
+  // 服务盲区：等时圈内逐格判缺聚合面，统一红框 + 纹理区分缺失类别（斜线↗/斜线↘/圆点）
+  if (visible.blindSpots && result?.blindSpots) {
+    for (const feat of result.blindSpots.features) {
+      const cat = feat.properties?.missing?.[0] as BlindCategory | undefined;
+      push(
+        polyOp(featureToRings(feat), {
+          fill: BLIND_FILL,
+          fillAlpha: BLIND_FILL_ALPHA,
+          stroke: BLIND_STROKE,
+          lineWidth: 2,
+          dash: feat.properties?.corridor ? [6, 4] : undefined,
+          hatch: BLIND_HATCH[cat ?? "convenience"],
         })
       );
     }
@@ -400,6 +489,12 @@ export default function BaiduMapImpl(props: MapImplProps) {
         ctx.setLineDash(op.dash ? op.dash.map((v) => v / sx) : NO_DASH);
         ctx.stroke(op.path);
       }
+      if (op.hatch) {
+        ctx.save();
+        ctx.clip(op.path, "evenodd");
+        drawHatch(ctx, op.bbox, op.hatch, sx, sy);
+        ctx.restore();
+      }
     }
     ctx.globalAlpha = 1;
     ctx.setLineDash(NO_DASH);
@@ -416,29 +511,6 @@ export default function BaiduMapImpl(props: MapImplProps) {
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.setLineDash(NO_DASH);
-    }
-
-    // 服务盲区红点：1km 内缺某类设施的格中心（区域诊断层，压在 POI 之下）
-    if (p.visible.blindSpots && p.result?.blindPoints) {
-      const bWorld = (BLIND_POINT_RADIUS_M * sy) / METERS_PER_DEG_LAT;
-      const bPx = Math.max(5, bWorld);
-      for (const feat of p.result.blindPoints.features) {
-        const geom = feat.geometry;
-        if (geom.type !== "Point") continue;
-        const [blng, blat] = geom.coordinates as [number, number];
-        const x = px(blng);
-        const y = py(blat);
-        if (x < -40 || y < -40 || x > w + 40 || y > h + 40) continue;
-        ctx.globalAlpha = 0.8;
-        ctx.beginPath();
-        ctx.arc(x, y, bPx, 0, Math.PI * 2);
-        ctx.fillStyle = "#ef4444";
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
     }
 
     // POI 圆点：世界半径随缩放变化，但保证最小 4px 屏幕半径，

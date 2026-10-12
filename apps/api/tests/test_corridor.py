@@ -57,7 +57,6 @@ def _post(client, minutes=15, **extra):
         "minutes": minutes,
         "engine": "map-fabric",
         "includeOfficialIsochrone": False,
-        "includeBlindWalk": True,
         "phase": "full",
     }
     body.update(extra)

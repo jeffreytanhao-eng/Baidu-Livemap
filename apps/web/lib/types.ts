@@ -166,8 +166,6 @@ export interface CheckupResponse {
   coverage: Coverage;
   sectorGaps: SectorGap[];
   blindSpots: GeoFeatureCollection;
-  /** 盲区格中心点（1km 内缺某类设施的位置），红色圆点图层用 */
-  blindPoints?: GeoFeatureCollection;
   blindSummary: {
     conveniencePct: number;
     healthPct: number;

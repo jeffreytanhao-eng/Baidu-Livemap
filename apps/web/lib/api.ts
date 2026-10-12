@@ -63,7 +63,6 @@ export async function postCheckup(
       minutes,
       engine,
       includeOfficialIsochrone: false,
-      includeBlindWalk: true,
       phase,
       blindFilter,
     }),

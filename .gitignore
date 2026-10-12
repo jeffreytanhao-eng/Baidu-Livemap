@@ -23,6 +23,8 @@ dist/
 # data：Geofabrik 原始 OSM 抽取（北京 35 MB / 上海 25 MB / 广东 165 MB）
 # 仅用于离线重切底图，体积超出 GitHub 单文件上限，不进 Git（见 README 目录结构）
 data/*.osm.pbf
+# 小区首图自托管目录（数千张 jpg，本地采集产物，不进 Git）
+data/uploads/
 # 六环 lite 底图（~34MB，生成物，可由 PBF + import_osm_fabric.py --ring6 --lite 重建）
 data/map_fabric/beijing6r/
 # 六环全量裁片（~78MB，切片源）与 4km 网格片（~308MB，251 片）

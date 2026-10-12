@@ -1,4 +1,4 @@
-import type { PoiCategory, SectorDirection } from "./types";
+import type { BlindCategory, PoiCategory, SectorDirection } from "./types";
 
 export const DEFAULT_CENTER = { lng: 116.4627, lat: 39.8842 }; // 劲松街道（OSM 真实路网路口，bd09ll）
 export const DEFAULT_MINUTES = 15;
@@ -66,6 +66,27 @@ export const BUILDING_COLORS: Record<string, { fill: string; stroke?: string; fi
   podium: { fill: "transparent", stroke: "#0d9488", fillOpacity: 0 },
   blocked: { fill: "#a8a29e", fillOpacity: 0.7 },
   open: { fill: "#bbf7d0", fillOpacity: 0.6 },
+};
+
+/**
+ * 盲区：统一红框，用纹理区分缺失类别（斜线↗ / 斜线↘ / 圆点），避免引入过多颜色。
+ * 三个消费者需保持视觉一致：BaiduMapImpl（canvas hatch）、SvgMapImpl（SVG pattern）、LayerPanel（图例小图标）。
+ */
+export const BLIND_STROKE = "#dc2626";
+export const BLIND_FILL = "#ef4444";
+export const BLIND_FILL_ALPHA = 0.1;
+
+export type BlindHatch = "up" | "down" | "dot";
+export const BLIND_HATCH: Record<BlindCategory, BlindHatch> = {
+  convenience: "up", // 斜线 ↗
+  health: "down", // 斜线 ↘
+  education: "dot", // 圆点
+};
+
+export const BLIND_LABELS: Record<BlindCategory, string> = {
+  convenience: "1km 内缺菜市场/超市",
+  health: "1km 内缺药店/医院",
+  education: "1km 内缺小学",
 };
 
 export const BUILDING_CATEGORY_LABEL: Record<string, string> = {

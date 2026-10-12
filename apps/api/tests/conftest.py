@@ -46,7 +46,6 @@ def _post_checkup(
         "minutes": minutes,
         "engine": engine,
         "includeOfficialIsochrone": False,
-        "includeBlindWalk": True,
         "phase": phase,
     }
     body.update(extra)

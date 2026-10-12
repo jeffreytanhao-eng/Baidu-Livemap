@@ -26,7 +26,6 @@ def _run(ctx, minutes, phase="full", center=None):
             center_wgs=center or JINSONG_CENTER_WGS,
             minutes=minutes,
             engine="map-fabric",
-            include_blind_walk=True,
             phase=phase,
             allow_snapshot=False,
         )

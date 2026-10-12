@@ -22,7 +22,6 @@ def test_official_isochrone_unavailable_falls_back_with_note(
             "minutes": 16,
             "engine": "map-fabric",
             "includeOfficialIsochrone": True,
-            "includeBlindWalk": True,
             "phase": "full",
         },
     )

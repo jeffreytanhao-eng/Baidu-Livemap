@@ -13,7 +13,6 @@ FULL_KEYS = {
     "coverage",
     "sectorGaps",
     "blindSpots",
-    "blindPoints",
     "blindSummary",
     "diagnosis",
     "straightCircle",
@@ -98,10 +97,15 @@ def test_full_contract_fields(client, post_checkup, sample_center_bd):
         assert 0.0 <= gap["gapRatio"] <= 1.0
 
     assert body["blindSpots"]["type"] == "FeatureCollection"
-    assert body["blindPoints"]["type"] == "FeatureCollection"
-    for feat in body["blindPoints"]["features"]:
-        assert feat["geometry"]["type"] == "Point"
-        assert set(feat["properties"]["missing"]) <= {"convenience", "health", "education"}
+    for feat in body["blindSpots"]["features"]:
+        assert feat["geometry"]["type"] in ("Polygon", "MultiPolygon")
+        assert feat["properties"]["missing"] in (
+            ["convenience"],
+            ["health"],
+            ["education"],
+        )
+        assert isinstance(feat["properties"]["corridor"], bool)
+        assert feat["properties"]["cells"] > 0
     assert {"conveniencePct", "healthPct", "educationPct"} <= set(body["blindSummary"])
 
     assert 3 <= len(body["diagnosis"]) <= 6

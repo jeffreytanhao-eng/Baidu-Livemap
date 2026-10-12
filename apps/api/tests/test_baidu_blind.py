@@ -24,7 +24,6 @@ def _post(client, center_bd, minutes=15, **extra):
         "minutes": minutes,
         "engine": "demo",
         "includeOfficialIsochrone": False,
-        "includeBlindWalk": True,
         "phase": "full",
     }
     body.update(extra)

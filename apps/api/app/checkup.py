@@ -25,7 +25,6 @@ from geo import (
     DEFAULT_CATEGORIES,
     GRID_CELL_M,
     bd09ll_to_wgs84,
-    blindspot_points,
     blindspots,
     build_isochrone,
     circle_radius_m,
@@ -39,7 +38,7 @@ from geo import (
     wgs84_to_bd09ll,
 )
 from geo.coords import LocalProjection
-from shapely.geometry import GeometryCollection, LineString, Point, mapping
+from shapely.geometry import GeometryCollection, LineString, Point, mapping, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform as shp_transform
 from shapely.ops import unary_union
@@ -90,12 +89,13 @@ _DIR_ANGLE = {
 _REGION_DENSITY = {"jinsong": 1.0, "zhongguancun": 1.4, "nanyuan": 0.65}
 
 # 结果缓存 schema 版本：分类体系等响应结构变化时 +1，旧缓存自然失配
-CACHE_SCHEMA = "cat15"  # 15：新增盲区格中心点 blindPoints（旧缓存无该字段，bump 失效重算）
+CACHE_SCHEMA = "cat16"  # 16：盲区改等时圈逐格判直线 1km（删 blindPoints，判缺口径变，失效重算）
 
 # 演示快照精确档位之外的分钟，统一回退到 15 分钟快照
 _SNAPSHOT_FALLBACK_MINUTES = 15
 
-# 盲区网格总格数（与 geo.blindspot 的写死口径一致：1000m 半径 / 100m 格）
+# 盲区分母兜底：无等时圈域（退化 1km 圆）时的总格数，与 geo.blindspot 一致；
+# 有域时 _blind_summary 用 FC 的 totalCells（=域内格数）
 _BLIND_TOTAL_CELLS = sum(
     1
     for ix in range(-int(BLINDSPOT_RADIUS_M / GRID_CELL_M), int(BLINDSPOT_RADIUS_M / GRID_CELL_M) + 1)
@@ -363,7 +363,7 @@ def _blind_summary(blind_fc: dict) -> dict:
         for cat in props.get("missing") or []:
             if cat in missing_cells:
                 missing_cells[cat] += int(props.get("cells") or 0)
-    total = max(1, _BLIND_TOTAL_CELLS)
+    total = int(blind_fc.get("totalCells") or 0) or max(1, _BLIND_TOTAL_CELLS)
     return {
         "conveniencePct": missing_cells["convenience"] / total,
         "healthPct": missing_cells["health"] / total,
@@ -372,9 +372,9 @@ def _blind_summary(blind_fc: dict) -> dict:
 
 
 def _fc_to_bd09ll(fc: dict) -> dict:
-    """盲区 FC（WGS84 几何）整体转 BD09LL 展示坐标。"""
+    """盲区 FC（WGS84 几何）整体转 BD09LL 展示坐标（保留 totalCells 等顶层成员）。"""
     return {
-        "type": "FeatureCollection",
+        **fc,
         "features": [
             {**f, "geometry": geometry_wgs84_to_bd09ll(f["geometry"])}
             for f in fc.get("features", [])
@@ -613,7 +613,23 @@ def _serve_cached(payload: dict, elapsed_ms: int) -> dict:
     return {**payload, "meta": {**payload["meta"], "elapsedMs": elapsed_ms}}
 
 
-def _apply_blind_filter_to_snapshot(
+def _snapshot_main_domain(snapshot: dict) -> dict | None:
+    """快照主等时圈（最大分钟层，BD09LL）转 WGS84 GeoJSON，作盲区判定域。"""
+    layers = snapshot.get("layers") or []
+    if not layers:
+        return None
+    main = max(layers, key=lambda l: int(l.get("minutes") or 0))
+    geom = (main.get("polygon") or {}).get("geometry")
+    if not geom:
+        return None
+    try:
+        wgs = shp_transform(lambda x, y: bd09ll_to_wgs84(x, y), shape(geom))
+    except Exception:
+        return None
+    return None if wgs.is_empty else mapping(wgs)
+
+
+async def _apply_blind_filter_to_snapshot(
     ctx: EngineContext,
     bundle: RegionBundle,
     center_wgs: tuple[float, float],
@@ -623,53 +639,29 @@ def _apply_blind_filter_to_snapshot(
 ) -> dict:
     """demo 快照路径的盲区筛选：只重算盲区层与汇总，其余字段沿用快照。
 
-    快照 pois 是 BD09LL 展示坐标且无 ``_raw``，这里转回 WGS84 后吸附查
-    （缓存的）同一次 cutoff_dijkstra costs，保证口径与现场计算一致。
+    口径与现场计算一致：全量 POI（demo 确定性合成，种子随中心/底图固定，
+    覆盖等时圈外圈——快照内 pois 只是圈内展示子集，不能用于判覆盖），
+    判定域取快照主等时圈，逐格判「直线 1km 内无题面设施组」。
     """
-    graph = bundle.graph
-    node = graph.snap(*center_wgs)
-    if node is None:
-        node, _ = _nearest_node(graph, *center_wgs)
-    node_key = (bundle.name, node, minutes, bundle.graph_version)
-    costs = ctx.node_costs.get(node_key)
-    if costs is None:
-        costs = cutoff_dijkstra(graph, node, minutes * 60.0)
-        ctx.node_costs[node_key] = costs
-    blind_input = []
-    for p in snapshot.get("pois", []):
-        w_lng, w_lat = bd09ll_to_wgs84(p["lng"], p["lat"])
-        nid = graph.snap(w_lng, w_lat)
-        raw = (
-            costs[nid] / 60.0
-            if nid is not None and not math.isinf(costs[nid])
-            else math.inf
-        )
-        blind_input.append(
-            {
-                "category": p["category"],
-                "lng": w_lng,
-                "lat": w_lat,
-                "walk_minutes": raw,
-            }
-        )
+    pois, _ok = await _fetch_pois(ctx, bundle, center_wgs, minutes, demo_mode=True)
+    blind_input = [
+        {
+            "category": p["category"],
+            "name": p.get("name"),
+            "lng": p["lng"],
+            "lat": p["lat"],
+        }
+        for p in pois
+    ]
     blind_fc = blindspots(
         center_wgs,
         blind_input,
-        minutes=minutes,
-        enhanced=True,
         categories=tuple(blind_filter),
-    )
-    blind_points_fc = blindspot_points(
-        center_wgs,
-        blind_input,
-        minutes=minutes,
-        enhanced=True,
-        categories=tuple(blind_filter),
+        domain=_snapshot_main_domain(snapshot),
     )
     return {
         **snapshot,
         "blindSpots": _fc_to_bd09ll(blind_fc),
-        "blindPoints": _fc_to_bd09ll(blind_points_fc),
         "blindSummary": _blind_summary(blind_fc),
     }
 
@@ -680,7 +672,6 @@ async def run_checkup(
     center_wgs: tuple[float, float],
     minutes: int,
     engine: str,
-    include_blind_walk: bool,
     phase: str,
     include_official: bool = False,
     allow_snapshot: bool = True,
@@ -698,10 +689,10 @@ async def run_checkup(
     if demo_mode and allow_snapshot:
         snapshot = _load_snapshot(ctx, center_wgs, minutes)
         if snapshot is not None:
-            # 盲区层始终本地重算（毫秒级、零 API）：与 blindFilter 口径对齐，
-            # 并给旧快照补 blindPoints 红点层（快照其余字段不变）
+            # 盲区层始终本地重算（零 API）：与 blindFilter 口径对齐，
+            # 判定域=快照主等时圈（快照其余字段不变）
             if phase == "full":
-                snapshot = _apply_blind_filter_to_snapshot(
+                snapshot = await _apply_blind_filter_to_snapshot(
                     ctx,
                     bundle,
                     center_wgs,
@@ -898,13 +889,14 @@ async def run_checkup(
         else:
             if measured:
                 poi_views = calibrate_walk_minutes(poi_views, measured, minutes)
-    # 盲区输入：全量视图（圈外/不可达 = inf，本就不构成圈内覆盖），圈内选取之前取
+    # 盲区输入：全量视图（含圈外 POI——圈边格心的直线 1km 覆盖可伸到圈外），
+    # 圈内选取之前取；无名称 POI 不参与判缺（geo.blind_group 内过滤）
     blind_input = [
         {
             "category": p["category"],
+            "name": p.get("name"),
             "lng": p["_wgs"][0],
             "lat": p["_wgs"][1],
-            "walk_minutes": p["_raw"] if p["_raw"] is not None else math.inf,
         }
         for p in poi_views
     ]
@@ -913,24 +905,23 @@ async def run_checkup(
     poi_views = select_within_pois(poi_views, minutes)
     coverage, _nearest = compute_coverage(poi_views, minutes, main_area, circle_area)
 
-    # 1km 盲区（写死网格，enhanced 才跟 X 走）
+    # 盲区：判定域=主等时圈（corridor 路径用走廊几何），域内每格各自判
+    # 「直线 1km 内无该类题面设施（按名称收窄）」
     # blindFilter：只算所选类的 missing（None=复合全类；[]=不算盲区）
     blind_categories = (
         tuple(blind_filter) if blind_filter is not None else DEFAULT_CATEGORIES
     )
+    if corridor is not None:
+        blind_domain = _geom_local_to_wgs(iso_geom, corridor_proj)
+    elif not iso_geom.is_empty:
+        blind_domain = _geom_local_to_wgs(iso_geom, graph.proj)
+    else:
+        blind_domain = None
     blind_fc = blindspots(
         center_wgs,
         blind_input,
-        minutes=minutes,
-        enhanced=include_blind_walk,
         categories=blind_categories,
-    )
-    blind_points_fc = blindspot_points(
-        center_wgs,
-        blind_input,
-        minutes=minutes,
-        enhanced=include_blind_walk,
-        categories=blind_categories,
+        domain=blind_domain,
     )
     blind_summary = _blind_summary(blind_fc)
 
@@ -1005,7 +996,6 @@ async def run_checkup(
         "coverage": coverage,
         "sectorGaps": sector_gaps,
         "blindSpots": _fc_to_bd09ll(blind_fc),
-        "blindPoints": _fc_to_bd09ll(blind_points_fc),
         "blindSummary": blind_summary,
         "diagnosis": diagnosis,
         "straightCircle": {"radiusM": circle_radius_m(minutes)},

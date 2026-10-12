@@ -1,18 +1,23 @@
-"""1 km 三类（便利生活/医疗保障/学习教育）盲区灰块与格中心点。
+"""等时圈内「服务盲区」面：逐格判「直线 1km 内无题面设施组」。
 
-网格半径写死 1000m、格宽 100m，不随 X 缩放；直线口径判缺，
-增强开关「步行 >X 分钟不可达」才跟 X 走。逐类独立 4-连通聚合成区域
-（每类 missing 单标签，避免跨类并集裹挟），
-长宽比 >3 的带状区域标记 corridor=true（灰色走廊）。
-blindspot_points 输出同一口径的缺格格中心点（地图红色圆点图层用）。
+赛题口径（菜市场/药店/小学）落成三组设施，按名称收窄匹配：
+- market   缺菜市场/超市：convenience/mall 类名称含 菜场|菜市场|农贸市场|生鲜|超市
+- pharmacy 缺药店/医院：  health 类名称含 药店|药房|医院|诊所|社区卫生服务
+- school   缺小学：      education 类名称含 小学
+
+网格 100m；判定域为传入的等时圈面（domain，WGS84 GeoJSON 几何）——
+域内每个格心各自判「自身直线 1km 内有无该组设施」；未传 domain 时
+退化为以中心为圆心的 1km 圆。逐类独立 4-连通聚合成面
+（properties.missing 恒为单标签），长宽比 >3 的带状区域标记 corridor=true。
 """
 
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 
-from shapely.geometry import mapping, shape
+from shapely.geometry import Point, mapping, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform as shp_transform
 from shapely.ops import unary_union
@@ -28,13 +33,37 @@ CATEGORY_HEALTH = "health"
 CATEGORY_EDUCATION = "education"
 DEFAULT_CATEGORIES = (CATEGORY_CONVENIENCE, CATEGORY_HEALTH, CATEGORY_EDUCATION)
 
+# 复合类名（API blindFilter 口径）→ 题面设施组；mall 归入 market 组
+CATEGORY_TO_GROUP = {
+    CATEGORY_CONVENIENCE: "market",
+    CATEGORY_HEALTH: "pharmacy",
+    CATEGORY_EDUCATION: "school",
+}
+GROUP_TO_CATEGORY = {g: c for c, g in CATEGORY_TO_GROUP.items()}
+
+_MARKET_RE = re.compile(r"菜场|菜市场|农贸市场|生鲜|超市")
+_PHARMACY_RE = re.compile(r"药店|药房|医院|诊所|社区卫生服务")
+_SCHOOL_RE = re.compile(r"小学")
+
+
+def blind_group(category: str, name: str | None) -> str | None:
+    """题面设施组归类：market/pharmacy/school；名称不匹配返回 None。"""
+    n = name or ""
+    if category in (CATEGORY_CONVENIENCE, "mall") and _MARKET_RE.search(n):
+        return "market"
+    if category == CATEGORY_HEALTH and _PHARMACY_RE.search(n):
+        return "pharmacy"
+    if category == CATEGORY_EDUCATION and _SCHOOL_RE.search(n):
+        return "school"
+    return None
+
 
 @dataclass(slots=True)
 class BlindspotPoi:
     category: str
     lng: float
     lat: float
-    walk_minutes: float | None = None  # 增强模式用
+    name: str | None = None
 
 
 def _cell_polygon(cx: float, cy: float, half: float) -> BaseGeometry:
@@ -43,59 +72,84 @@ def _cell_polygon(cx: float, cy: float, half: float) -> BaseGeometry:
     return box(cx - half, cy - half, cx + half, cy + half)
 
 
+def _domain_local(domain: dict | None, proj: LocalProjection) -> BaseGeometry | None:
+    """等时圈几何（WGS84）转本地米空间；空/非法输入按无域处理。"""
+    if not domain:
+        return None
+    try:
+        geom = shape(domain)
+    except Exception:
+        return None
+    if geom.is_empty:
+        return None
+    return shp_transform(lambda x, y: proj.to_xy(x, y), geom)
+
+
 def _missing_cells(
     center: tuple[float, float],
     pois: list[BlindspotPoi | dict],
-    minutes: int,
-    enhanced: bool,
     categories: tuple[str, ...],
+    domain: dict | None = None,
 ) -> tuple[
     LocalProjection,
     dict[tuple[int, int], tuple[float, float]],
     dict[tuple[int, int], set[str]],
 ]:
-    """公共前置：POI 归一化投影 + 1km 网格生成 + 逐格判缺。
+    """公共前置：POI 归一化投影 + 网格生成（等时圈域/1km 圆）+ 逐格判缺。
 
     返回 (投影, 格心表 {(ix,iy): (cx,cy) 米}, 缺格表 {(ix,iy): {缺失类别}})。
     """
     proj = LocalProjection(*center)
-    norm_pois: list[tuple[str, float, float, float | None]] = []
+    norm_pois: list[tuple[str, float, float]] = []
     for poi in pois:
         if isinstance(poi, dict):
             cat = str(poi.get("category") or "")
+            name = poi.get("name")
             lng = float(poi["lng"])
             lat = float(poi["lat"])
-            walk = poi.get("walk_minutes")
         else:
-            cat, lng, lat, walk = poi.category, poi.lng, poi.lat, poi.walk_minutes
-        if cat not in categories:
+            cat, name, lng, lat = poi.category, poi.name, poi.lng, poi.lat
+        group = blind_group(cat, name)
+        if group is None:
+            continue  # 非题面设施（便利店/养老院/幼儿园等）不参与判缺
+        cat_key = GROUP_TO_CATEGORY[group]  # mall → convenience 键
+        if cat_key not in categories:
             continue
         x, y = proj.to_xy(lng, lat)
-        norm_pois.append((cat, x, y, None if walk is None else float(walk)))
+        norm_pois.append((cat_key, x, y))
 
-    # 1) 生成覆盖 1km 圆的 100m 网格（范围与 minutes 无关）
-    n = math.ceil(BLINDSPOT_RADIUS_M / GRID_CELL_M)
+    # 1) 生成网格：有等时圈域时覆盖域 bbox（格心在域内），否则退化 1km 圆
+    domain_geom = _domain_local(domain, proj)
     cells: dict[tuple[int, int], tuple[float, float]] = {}
-    for ix in range(-n, n + 1):
-        for iy in range(-n, n + 1):
-            cx, cy = ix * GRID_CELL_M, iy * GRID_CELL_M
-            if math.hypot(cx, cy) <= BLINDSPOT_RADIUS_M:
-                cells[(ix, iy)] = (cx, cy)
+    if domain_geom is not None:
+        minx, miny, maxx, maxy = domain_geom.bounds
+        ix0, ix1 = math.floor(minx / GRID_CELL_M), math.ceil(maxx / GRID_CELL_M)
+        iy0, iy1 = math.floor(miny / GRID_CELL_M), math.ceil(maxy / GRID_CELL_M)
+        for ix in range(ix0, ix1 + 1):
+            for iy in range(iy0, iy1 + 1):
+                cx, cy = ix * GRID_CELL_M, iy * GRID_CELL_M
+                if domain_geom.contains(Point(cx, cy)):
+                    cells[(ix, iy)] = (cx, cy)
+    else:
+        n = math.ceil(BLINDSPOT_RADIUS_M / GRID_CELL_M)
+        for ix in range(-n, n + 1):
+            for iy in range(-n, n + 1):
+                cx, cy = ix * GRID_CELL_M, iy * GRID_CELL_M
+                if math.hypot(cx, cy) <= BLINDSPOT_RADIUS_M:
+                    cells[(ix, iy)] = (cx, cy)
 
-    # 2) 每格判缺
+    # 2) 每格判缺：该格中心直线 1km 内无该类题面设施
     r2 = BLINDSPOT_RADIUS_M * BLINDSPOT_RADIUS_M
     missing: dict[tuple[int, int], set[str]] = {}
     for key, (cx, cy) in cells.items():
         miss: set[str] = set()
         for cat in categories:
             available = False
-            for pcat, px, py, walk in norm_pois:
+            for pcat, px, py in norm_pois:
                 if pcat != cat:
                     continue
                 if (px - cx) ** 2 + (py - cy) ** 2 > r2:
                     continue
-                if enhanced and walk is not None and walk > minutes:
-                    continue  # 步行 >X 分钟不可达
                 available = True
                 break
             if not available:
@@ -108,19 +162,17 @@ def _missing_cells(
 def blindspots(
     center: tuple[float, float],
     pois: list[BlindspotPoi | dict],
-    minutes: int = 15,
-    enhanced: bool = False,
     categories: tuple[str, ...] = DEFAULT_CATEGORIES,
+    domain: dict | None = None,
 ) -> dict:
-    """计算 1km 盲区灰块，输出 GeoJSON FeatureCollection。
+    """计算服务盲区面，输出 GeoJSON FeatureCollection。
 
-    - 网格范围写死 1000m（不随 ``minutes``）；
-    - 每格判定「直线 1km 内无该类 POI」为缺；
-    - ``enhanced=True`` 时，提供了 walk_minutes 的 POI 还需满足 <= minutes 才算可达；
+    - 判定域为 ``domain``（等时圈，WGS84 几何）内的格；缺省为中心 1km 圆；
+    - 每格判定「该格直线 1km 内无该类题面设施（按名称收窄）」为缺；
     - 逐类 4-连通聚合缺格为区域（properties.missing 恒为单标签），
       长宽比 >3 标记 corridor=true。
     """
-    proj, cells, missing = _missing_cells(center, pois, minutes, enhanced, categories)
+    proj, cells, missing = _missing_cells(center, pois, categories, domain)
     half = GRID_CELL_M / 2.0
 
     # 3) 逐类独立 4-连通聚合。
@@ -170,45 +222,14 @@ def blindspots(
                     },
                 }
             )
-    return {"type": "FeatureCollection", "features": features}
-
-
-def blindspot_points(
-    center: tuple[float, float],
-    pois: list[BlindspotPoi | dict],
-    minutes: int = 15,
-    enhanced: bool = False,
-    categories: tuple[str, ...] = DEFAULT_CATEGORIES,
-) -> dict:
-    """计算 1km 盲区格中心点，输出 GeoJSON FeatureCollection。
-
-    与 :func:`blindspots` 同网格、同判缺口径，每个缺格输出一个
-    Point Feature（格中心，WGS84）：properties.missing 为该格缺失
-    类别列表（可能多类），供地图红色圆点图层逐点标注盲区位置。
-    """
-    proj, cells, missing = _missing_cells(center, pois, minutes, enhanced, categories)
-    features: list[dict] = []
-    for key, miss in missing.items():
-        cx, cy = cells[key]
-        features.append(
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": proj.to_lnglat(cx, cy),
-                },
-                "properties": {"missing": sorted(miss)},
-            }
-        )
-    return {"type": "FeatureCollection", "features": features}
+    return {"type": "FeatureCollection", "totalCells": len(cells), "features": features}
 
 
 def blindspots_from_geojson(
     center: tuple[float, float],
     poi_geojson: dict,
-    minutes: int = 15,
-    enhanced: bool = False,
     categories: tuple[str, ...] = DEFAULT_CATEGORIES,
+    domain: dict | None = None,
 ) -> dict:
     """便捷入口：POI 以 GeoJSON FeatureCollection 传入。"""
     pois: list[BlindspotPoi] = []
@@ -223,8 +244,7 @@ def blindspots_from_geojson(
                 category=str(props.get("category") or ""),
                 lng=float(lng),
                 lat=float(lat),
-                walk_minutes=props.get("walk_minutes"),
+                name=props.get("name"),
             )
         )
-    _ = shape  # 保留接口对称性
-    return blindspots(center, pois, minutes=minutes, enhanced=enhanced, categories=categories)
+    return blindspots(center, pois, categories=categories, domain=domain)

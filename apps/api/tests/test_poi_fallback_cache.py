@@ -38,7 +38,6 @@ def test_quota_dead_pois_not_cached(client, monkeypatch, sample_center_bd):
         "minutes": "15",
         "engine": "map-fabric",
         "includeOfficialIsochrone": False,
-        "includeBlindWalk": True,
         "phase": "full",
     }
     r = client.post("/api/v1/checkup", json=body)

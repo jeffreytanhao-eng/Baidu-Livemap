@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BUILDING_COLORS,
+  BLIND_FILL,
+  BLIND_HATCH,
+  BLIND_STROKE,
   POI_CATEGORY_META,
   WALK_SPEED_M_PER_MIN,
   isoColor,
 } from "@/lib/constants";
 import { featureToPathData, fromMeters, toMeters } from "@/lib/geo";
-import type { GeoFeature, LngLat, Poi } from "@/lib/types";
+import type { BlindCategory, GeoFeature, LngLat, Poi } from "@/lib/types";
 import type { MapImplProps } from "./mapTypes";
 import CommunityInfoBox from "./CommunityInfoBox";
 
@@ -63,6 +66,9 @@ export default function SvgMapImpl(props: MapImplProps) {
   const halfH = baseHalf / view.k;
   const halfW = halfH * (size.w / size.h);
   const viewBox = `${view.cx - halfW} ${view.cy - halfH} ${2 * halfW} ${2 * halfH}`;
+  // 盲区纹理参数：间距/线宽按屏幕像素恒定换算成米（viewBox 无各向异性，x/y 同比例）
+  const meterPerPx = (2 * halfH) / Math.max(1, size.h);
+  const hatchSpacingM = 9 * meterPerPx;
 
   const screenToLngLat = useCallback(
     (clientX: number, clientY: number): LngLat => {
@@ -216,6 +222,54 @@ export default function SvgMapImpl(props: MapImplProps) {
         onPointerUp={onPointerUp}
         onWheel={onWheel}
       >
+        {/* 盲区纹理 pattern：斜线↗ / 斜线↘ / 圆点（与 canvas 版视觉一致） */}
+        <defs>
+          <pattern
+            id="blind-hatch-up"
+            width={hatchSpacingM}
+            height={hatchSpacingM}
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-45)"
+          >
+            <rect width={hatchSpacingM} height={hatchSpacingM} fill={BLIND_FILL} fillOpacity={0.1} />
+            <line
+              x1={hatchSpacingM / 2}
+              y1={0}
+              x2={hatchSpacingM / 2}
+              y2={hatchSpacingM}
+              stroke={BLIND_STROKE}
+              strokeWidth={1.2 * meterPerPx}
+            />
+          </pattern>
+          <pattern
+            id="blind-hatch-down"
+            width={hatchSpacingM}
+            height={hatchSpacingM}
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width={hatchSpacingM} height={hatchSpacingM} fill={BLIND_FILL} fillOpacity={0.1} />
+            <line
+              x1={hatchSpacingM / 2}
+              y1={0}
+              x2={hatchSpacingM / 2}
+              y2={hatchSpacingM}
+              stroke={BLIND_STROKE}
+              strokeWidth={1.2 * meterPerPx}
+            />
+          </pattern>
+          <pattern id="blind-dot" width={hatchSpacingM} height={hatchSpacingM} patternUnits="userSpaceOnUse">
+            <rect width={hatchSpacingM} height={hatchSpacingM} fill={BLIND_FILL} fillOpacity={0.1} />
+            <circle
+              cx={hatchSpacingM / 2}
+              cy={hatchSpacingM / 2}
+              r={1.6 * meterPerPx}
+              fill={BLIND_STROKE}
+              fillOpacity={0.75}
+            />
+          </pattern>
+        </defs>
+
         {/* 直线对照圆（默认关） */}
         {visible.straightCircle && result && (
           <circle
@@ -373,22 +427,22 @@ export default function SvgMapImpl(props: MapImplProps) {
             );
           })}
 
-        {/* 服务盲区红点：1km 内缺某类设施的格中心（区域诊断层，不拦截点击） */}
+        {/* 服务盲区：等时圈内逐格判缺聚合面，统一红框 + 纹理区分缺失类别（区域诊断层，不拦截点击） */}
         {visible.blindSpots &&
-          result?.blindPoints?.features.map((f, i) => {
-            if (f.geometry.type !== "Point") return null;
-            const [blng, blat] = f.geometry.coordinates as [number, number];
-            const m = toMeters({ lng: blng, lat: blat }, anchor);
+          result?.blindSpots?.features.map((f, i) => {
+            const cat = f.properties?.missing?.[0] as BlindCategory | undefined;
+            const hatch = BLIND_HATCH[cat ?? "convenience"];
+            const corridor = Boolean(f.properties?.corridor);
             return (
-              <circle
-                key={`bp${i}`}
-                cx={m.x}
-                cy={-m.y}
-                r={45}
-                fill="#ef4444"
-                fillOpacity={0.8}
-                stroke="#ffffff"
-                strokeWidth={6}
+              <path
+                key={`bs${i}`}
+                d={featureToPathData(f, anchor)}
+                fill={`url(#blind-hatch-${hatch})`}
+                stroke={BLIND_STROKE}
+                strokeWidth={2 * meterPerPx}
+                strokeDasharray={corridor ? `${5 * meterPerPx} ${4 * meterPerPx}` : undefined}
+                strokeLinejoin="round"
+                fillRule="evenodd"
                 pointerEvents="none"
               />
             );

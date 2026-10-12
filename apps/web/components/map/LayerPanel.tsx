@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { BUILDING_CATEGORY_LABEL, BUILDING_COLORS, POI_CATEGORY_META, isoColor } from "@/lib/constants";
-import type { CheckupResponse, LayerVisibility } from "@/lib/types";
+import { BLIND_HATCH, BLIND_LABELS, BLIND_FILL, BLIND_STROKE, BUILDING_CATEGORY_LABEL, BUILDING_COLORS, POI_CATEGORY_META, isoColor } from "@/lib/constants";
+import type { BlindHatch } from "@/lib/constants";
+import type { BlindCategory, CheckupResponse, LayerVisibility } from "@/lib/types";
 import { Switch } from "@/components/ui/switch";
 
 const LAYER_ITEMS: { key: keyof LayerVisibility; label: string }[] = [
@@ -14,6 +15,29 @@ const LAYER_ITEMS: { key: keyof LayerVisibility; label: string }[] = [
   { key: "pois", label: "设施点(POI)" },
   { key: "blindSpots", label: "服务盲区(1km)" },
 ];
+
+/** 盲区图例小图标：红框 + 纹理（斜线↗/斜线↘/圆点），与地图面纹理视觉一致 */
+function BlindSwatch({ hatch }: { hatch: BlindHatch }) {
+  return (
+    <svg viewBox="0 0 12 12" className="inline-block h-3 w-3 shrink-0" aria-hidden>
+      <rect x="0.5" y="0.5" width="11" height="11" fill={BLIND_FILL} fillOpacity={0.1} stroke={BLIND_STROKE} strokeWidth={1} />
+      {hatch === "up" && (
+        <path d="M-2 6L6 -2M1 11L11 1M6 14L14 6" stroke={BLIND_STROKE} strokeWidth={1.2} fill="none" />
+      )}
+      {hatch === "down" && (
+        <path d="M-2 4L6 12M1 1L11 11M4 -2L12 6" stroke={BLIND_STROKE} strokeWidth={1.2} fill="none" />
+      )}
+      {hatch === "dot" && (
+        <g fill={BLIND_STROKE}>
+          <circle cx={3.5} cy={3.5} r={1.3} />
+          <circle cx={8.5} cy={3.5} r={1.3} />
+          <circle cx={3.5} cy={8.5} r={1.3} />
+          <circle cx={8.5} cy={8.5} r={1.3} />
+        </g>
+      )}
+    </svg>
+  );
+}
 
 export default function LayerPanel({
   visible,
@@ -31,7 +55,7 @@ export default function LayerPanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="absolute bottom-16 left-4 z-30 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-md no-print md:bottom-4"
+        className="absolute bottom-20 left-4 z-30 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-md no-print md:bottom-16"
       >
         图层 ▴
       </button>
@@ -43,7 +67,7 @@ export default function LayerPanel({
     : [];
 
   return (
-    <div className="absolute bottom-16 left-4 z-30 max-h-[70%] w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 shadow-lg no-print md:bottom-4">
+    <div className="absolute bottom-20 left-4 z-30 max-h-[70%] w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 shadow-lg no-print md:bottom-16">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-800">图层</span>
         <button
@@ -121,10 +145,14 @@ export default function LayerPanel({
               </div>
             ))}
           </div>
-          {result?.blindPoints && result.blindPoints.features.length > 0 && (
-            <div className="mt-1.5 flex items-center gap-1.5 border-t border-slate-100 pt-1.5 text-xs text-slate-600">
-              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#ef4444" }} />
-              服务盲区：1km 内缺菜市场/药店/小学（任一）
+          {result?.blindSpots && result.blindSpots.features.length > 0 && (
+            <div className="mt-1.5 border-t border-slate-100 pt-1.5 text-xs text-slate-600">
+              {(Object.keys(BLIND_HATCH) as BlindCategory[]).map((k) => (
+                <div key={k} className="flex items-center gap-1.5 py-0.5">
+                  <BlindSwatch hatch={BLIND_HATCH[k]} />
+                  {BLIND_LABELS[k]}
+                </div>
+              ))}
             </div>
           )}
         </div>

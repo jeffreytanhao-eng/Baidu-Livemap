@@ -54,7 +54,6 @@ class CheckupRequest(BaseModel):
     minutes: int = Field(ge=5, le=30)
     engine: str = "map-fabric"
     includeOfficialIsochrone: bool = False
-    includeBlindWalk: bool = True
     phase: Literal["fast", "full"] = "full"
     # 盲区单类/复合筛选：None=复合全类；子集只算所选类；非法值 400
     blindFilter: list[Literal["convenience", "health", "education"]] | None = None
@@ -159,7 +158,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             center_wgs=center_wgs,
             minutes=req.minutes,
             engine=req.engine,
-            include_blind_walk=req.includeBlindWalk,
             phase=req.phase,
             include_official=req.includeOfficialIsochrone,
             blind_filter=req.blindFilter,
