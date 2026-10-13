@@ -132,7 +132,7 @@ export default function Page() {
           <Link
             href="/"
             className="flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
-            title="返回导航页"
+            title="返回首页"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path
@@ -143,7 +143,7 @@ export default function Page() {
                 strokeLinejoin="round"
               />
             </svg>
-            导航
+            返回首页
           </Link>
           <span className="text-lg font-bold text-brand">附近小区生活圈</span>
           <span className="hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">

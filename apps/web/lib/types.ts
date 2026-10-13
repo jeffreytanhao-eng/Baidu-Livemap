@@ -122,7 +122,6 @@ export interface CommunityInfo {
     l2: CommunityRent | null;
     l3: CommunityRent | null;
   };
-  photoUrl?: string | null;
   intro?: string | null;
 }
 

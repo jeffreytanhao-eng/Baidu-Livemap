@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { EChartsOption } from "echarts";
 import { useECharts } from "@/hooks/useECharts";
-import { API_BASE } from "@/lib/api";
+import CommunityPlaceholder from "@/components/CommunityPlaceholder";
 import {
   POI_CATEGORY_META,
   SECTOR_DIRECTIONS,
@@ -306,7 +306,7 @@ export default function ReportPanel({
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-start gap-2.5">
-                <ScorePhoto info={communityInfo ?? null} />
+                <CommunityPlaceholder className="h-16 w-16 shrink-0 rounded-md" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold text-slate-800">
                     {communityInfo?.name ?? "暂无信息"}
@@ -611,23 +611,4 @@ function PoiHoverCard({
   );
 }
 
-/** 综合分卡左侧小区照片：加载失败退化为灰色占位块 */
-function ScorePhoto({ info }: { info: CommunityInfo | null }) {
-  const [broken, setBroken] = useState(false);
-  useEffect(() => setBroken(false), [info?.photoUrl]);
-  if (!info?.photoUrl || broken) {
-    return (
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] text-slate-400">
-        暂无照片
-      </div>
-    );
-  }
-  return (
-    <img
-      src={info.photoUrl.startsWith("http") ? info.photoUrl : `${API_BASE}${info.photoUrl}`}
-      alt={info.name}
-      className="h-16 w-16 shrink-0 rounded-md object-cover"
-      onError={() => setBroken(true)}
-    />
-  );
-}
+

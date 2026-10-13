@@ -274,7 +274,7 @@ export default function Page() {
         {/* 地图 */}
         <section id="map-section" className="relative min-h-0 flex-1">
           {/* 回退键：从「附近小区生活圈」进入时可选，直接进入时不可选 */}
-          <div className="absolute left-3 top-3 z-40 no-print">
+          <div className="absolute left-3 top-3 z-40 flex items-center gap-2 no-print">
             <button
               type="button"
               onClick={handleBackToNearby}
@@ -296,6 +296,23 @@ export default function Page() {
                 />
               </svg>
               返回附近小区
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              title="返回初始导航页"
+              className="flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 shadow-md transition-colors duration-150 hover:bg-slate-50"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M3 11l9-8 9 8M5 9.5V21h14V9.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              返回首页
             </button>
           </div>
           <MapView

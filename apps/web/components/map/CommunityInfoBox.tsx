@@ -1,8 +1,8 @@
 "use client";
 
-import { forwardRef, useState, type CSSProperties } from "react";
-import { API_BASE } from "@/lib/api";
+import { forwardRef, type CSSProperties } from "react";
 import type { CommunityInfo } from "@/lib/types";
+import CommunityPlaceholder from "@/components/CommunityPlaceholder";
 
 const RENT_LABELS: [keyof CommunityInfo["rent"], string][] = [
   ["l1", "一居"],
@@ -11,8 +11,8 @@ const RENT_LABELS: [keyof CommunityInfo["rent"], string][] = [
 ];
 
 /** 小区资讯框：定位点右侧浮层。
- *  照片（单张，加载失败显示占位灰块）、售卖均价、租金范围（一居/两居/三居，
- *  缺失显示「信息不足」）、简介与来源；右上角可关闭。
+ *  图片位置统一为占位效果图（版权合规，不展示实拍照片）、售卖均价、租金范围
+ *  （一居/两居/三居，缺失显示「信息不足」）、简介与来源；右上角可关闭。
  *  定位由父级控制（百度模式在重绘循环里设置 left/top，SVG 模式每帧计算）。 */
 const CommunityInfoBox = forwardRef<
   HTMLDivElement,
@@ -25,7 +25,6 @@ const CommunityInfoBox = forwardRef<
     style?: CSSProperties;
   }
 >(function CommunityInfoBox({ info, distanceM, onClose, className, style }, ref) {
-  const [imgFailed, setImgFailed] = useState(false);
   const rentText = (r: CommunityInfo["rent"][keyof CommunityInfo["rent"]]) =>
     r ? `${Math.round(r.min)}-${Math.round(r.max)} 元/月` : "信息不足";
 
@@ -46,19 +45,7 @@ const CommunityInfoBox = forwardRef<
         >
           ✕
         </button>
-        {info.photoUrl && !imgFailed ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={info.photoUrl.startsWith("http") ? info.photoUrl : `${API_BASE}${info.photoUrl}`}
-            alt={info.name}
-            className="h-28 w-full rounded-md object-cover"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <div className="flex h-28 w-full items-center justify-center rounded-md bg-slate-100 text-xs text-slate-400">
-            暂无照片
-          </div>
-        )}
+        <CommunityPlaceholder className="h-28 w-full rounded-md" />
         <div className="mt-2 flex items-baseline justify-between gap-2">
           <span className="min-w-0 truncate text-sm font-semibold text-slate-800">
             {info.name}

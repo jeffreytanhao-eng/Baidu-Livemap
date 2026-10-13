@@ -1,6 +1,6 @@
 """SQLite 小区数据存取：表结构、初始化与查询（stdlib sqlite3，不引 ORM）。
 
-数据由本地导入流程写入；坐标统一 WGS84。小区量级（示范区域数百~数千行）直接全表内存匹配即可。
+小区库为内置静态数据；坐标统一 WGS84。小区量级（示范区域数百~数千行）直接全表内存匹配即可。
 """
 
 from __future__ import annotations
@@ -24,11 +24,7 @@ CREATE TABLE IF NOT EXISTS communities (
   rent1_min REAL, rent1_max REAL,
   rent2_min REAL, rent2_max REAL,
   rent3_min REAL, rent3_max REAL,
-  photo_path TEXT,
   intro TEXT,
-  source TEXT,
-  source_url TEXT,
-  fetched_at TEXT,
   score REAL,
   scored_at TEXT
 );
@@ -48,7 +44,7 @@ def init_db(db_path: str | Path) -> None:
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     with connect(db_path) as conn:
         conn.executescript(_SCHEMA)
-        # 存量库迁移：communities 表补 score/scored_at 列（PRAGMA 逐列检查，幂等）
+        # 存量库迁移：补 score/scored_at 列（PRAGMA 逐列检查，幂等）
         cols = {r["name"] for r in conn.execute("PRAGMA table_info(communities)").fetchall()}
         if "score" not in cols:
             conn.execute("ALTER TABLE communities ADD COLUMN score REAL")
@@ -84,11 +80,6 @@ def _row_to_community(row: sqlite3.Row) -> dict:
         "bizcircle": row["bizcircle"],
         "saleAvg": row["sale_avg"],
         "rent": {"l1": _rent("1"), "l2": _rent("2"), "l3": _rent("3")},
-        "photoUrl": (
-            "/static/uploads/" + row["photo_path"].removeprefix("uploads/")
-            if row["photo_path"]
-            else None
-        ),
         "intro": row["intro"],
     }
 
@@ -146,44 +137,3 @@ def update_score(conn: sqlite3.Connection, community_id: int, score: float) -> N
         (float(score), datetime.now(timezone.utc).isoformat(timespec="seconds"), community_id),
     )
     conn.commit()
-
-
-def upsert_community(conn: sqlite3.Connection, item: dict) -> int:
-    """导入写入：norm 相同且坐标 <300m 视为同小区，更新而非重复插入。"""
-    norm = normalize_name(item["name"])
-    existing = conn.execute(
-        "SELECT id, lng, lat FROM communities WHERE name_norm = ?", (norm,)
-    ).fetchone()
-    if existing is not None:
-        d = haversine_m(item["lng"], item["lat"], existing["lng"], existing["lat"])
-        if d < 300.0:
-            conn.execute(
-                """UPDATE communities SET sale_avg=?, rent1_min=?, rent1_max=?, rent2_min=?,
-                   rent2_max=?, rent3_min=?, rent3_max=?, photo_path=?, intro=?, source=?,
-                   source_url=?, fetched_at=? WHERE id=?""",
-                (
-                    item.get("sale_avg"),
-                    item.get("rent1_min"), item.get("rent1_max"),
-                    item.get("rent2_min"), item.get("rent2_max"),
-                    item.get("rent3_min"), item.get("rent3_max"),
-                    item.get("photo_path"), item.get("intro"), item.get("source"),
-                    item.get("source_url"), item.get("fetched_at"), existing["id"],
-                ),
-            )
-            return existing["id"]
-    cur = conn.execute(
-        """INSERT INTO communities (name, name_norm, lng, lat, district, bizcircle, sale_avg,
-           rent1_min, rent1_max, rent2_min, rent2_max, rent3_min, rent3_max, photo_path,
-           intro, source, source_url, fetched_at)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-        (
-            item["name"], norm, item["lng"], item["lat"], item.get("district"),
-            item.get("bizcircle"), item.get("sale_avg"),
-            item.get("rent1_min"), item.get("rent1_max"),
-            item.get("rent2_min"), item.get("rent2_max"),
-            item.get("rent3_min"), item.get("rent3_max"),
-            item.get("photo_path"), item.get("intro"), item.get("source"),
-            item.get("source_url"), item.get("fetched_at"),
-        ),
-    )
-    return int(cur.lastrowid)
