@@ -23,7 +23,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 
-const SECTOR_RE = /^sector:([A-Z]{1,2})\s*/;
+// sector 前缀：后端模板固定用英文缩写（sector:NW）；LLM 偶发输出中文方向
+// （sector:西北），中文变体在此兜底归一到英文 SectorDirection
+const SECTOR_RE = /^sector:([A-Z]{1,2}|[东南西北]{1,2})\s*/;
+const CN_SECTOR_TO_KEY: Record<string, SectorDirection> = {
+  北: "N",
+  东北: "NE",
+  东: "E",
+  东南: "SE",
+  南: "S",
+  西南: "SW",
+  西: "W",
+  西北: "NW",
+};
 
 /** POI 打标 tag -> 展示名（重点学校/三甲医院/地铁站） */
 const HOT_TAG_LABEL: Record<string, string> = {
@@ -34,9 +46,12 @@ const HOT_TAG_LABEL: Record<string, string> = {
 
 function parseDiagnosis(text: string): { sector: SectorDirection | null; body: string } {
   const m = text.match(SECTOR_RE);
-  if (m && (SECTOR_DIRECTIONS as string[]).includes(m[1])) {
-    return { sector: m[1] as SectorDirection, body: text.slice(m[0].length) };
-  }
+  if (!m) return { sector: null, body: text };
+  const raw = m[1];
+  const sector = (
+    (SECTOR_DIRECTIONS as string[]).includes(raw) ? raw : CN_SECTOR_TO_KEY[raw]
+  ) as SectorDirection | undefined;
+  if (sector) return { sector, body: text.slice(m[0].length) };
   return { sector: null, body: text };
 }
 
