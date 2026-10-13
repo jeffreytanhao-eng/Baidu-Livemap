@@ -29,7 +29,7 @@ export default function TopBar({
       <div className="flex h-14 items-center gap-3 px-4">
         {/* 品牌 */}
         <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-brand">百度地图15分钟生活圈</span>
+            <span className="text-lg font-bold text-brand">好小区 - 百度地图15分钟生活圈</span>
             <span className="hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">
               Livemap（版本支持北京六环内区域高精度结果）
             </span>

@@ -46,7 +46,7 @@ export default function Page() {
     <div className="flex min-h-dvh flex-col bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-14 max-w-4xl items-center px-4">
-          <span className="text-lg font-bold text-brand">百度地图15分钟生活圈</span>
+          <span className="text-lg font-bold text-brand">好小区 - 百度地图15分钟生活圈</span>
           <span className="ml-2 hidden text-xs font-medium tracking-wide text-slate-400 sm:inline">
             Livemap（版本支持北京六环内区域高精度结果）
           </span>
