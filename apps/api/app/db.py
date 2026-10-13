@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from geo import haversine_m
@@ -134,6 +134,6 @@ def update_score(conn: sqlite3.Connection, community_id: int, score: float) -> N
     """体检得分回写：记录得分与打分时间（UTC ISO）。长期共享连接需显式提交。"""
     conn.execute(
         "UPDATE communities SET score=?, scored_at=? WHERE id=?",
-        (float(score), datetime.now(timezone.utc).isoformat(timespec="seconds"), community_id),
+        (float(score), datetime.now(UTC).isoformat(timespec="seconds"), community_id),
     )
     conn.commit()
