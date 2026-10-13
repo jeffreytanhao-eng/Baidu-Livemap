@@ -3,8 +3,8 @@ import Link from "next/link";
 const ENTRIES = [
   {
     href: "/nearby",
-    title: "附近小区生活圈",
-    desc: "地图点选任意位置，查看周边 1 公里内小区列表与距离，可一键定位小区位置或进入生活圈评估详情。",
+    title: "发现附近小区",
+    desc: "在地图选取任意位置，查看周边 1 公里内小区，支持小区地图定位及进一步评估。",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
