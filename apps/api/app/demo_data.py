@@ -29,6 +29,7 @@ REGION_CENTERS: dict[str, tuple[float, float]] = {
     "jinsong": (116.4578, 39.8846),
     "zhongguancun": (116.316, 39.983),
     "nanyuan": (116.386, 39.812),
+    "shangdi": (116.312, 40.046),
 }
 
 # 劲松样例中心（WGS84）：落在 OSM 真实路网节点 982（度 4 路口），保证默认 pin 直接吸附成功；
@@ -41,6 +42,8 @@ SAMPLES: tuple[SampleDef, ...] = (
     SampleDef("jinsong_20", "jinsong", "劲松街道", _JINSONG_SAMPLE_CENTER, 20),
     SampleDef("zhongguancun_15", "zhongguancun", "中关村", REGION_CENTERS["zhongguancun"], 15),
     SampleDef("nanyuan_15", "nanyuan", "南苑", REGION_CENTERS["nanyuan"], 15),
+    # 上地样例中心（WGS84）：上地三街/上地东路交汇附近，build_sample 期吸附到路网节点
+    SampleDef("shangdi_15", "shangdi", "上地", (116.3139, 40.0440), 15),
 )
 
 # 演示模式下请求中心距样例中心不超过该距离才直接回快照。

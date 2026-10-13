@@ -35,7 +35,7 @@ from .demo_data import JINSONG_DEMO_ROUTES, REGION_CENTERS
 
 logger = logging.getLogger("livemap.engine")
 
-KNOWN_REGIONS: tuple[str, ...] = ("jinsong", "zhongguancun", "nanyuan")
+KNOWN_REGIONS: tuple[str, ...] = ("jinsong", "zhongguancun", "nanyuan", "shangdi")
 # 六环全域由全量网格片（TileManager 懒加载，b6r_* 目录）覆盖，
 # 不再使用单一 lite 大 region；LITE_REGIONS 仅为兼容保留（当前为空）
 LITE_REGIONS: frozenset[str] = frozenset()

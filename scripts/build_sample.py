@@ -55,7 +55,6 @@ def main() -> int:
                 center_wgs=sample.center_wgs,
                 minutes=sample.minutes,
                 engine="map-fabric",
-                include_blind_walk=True,
                 phase="full",
                 allow_snapshot=False,  # 生成期不回读已有快照
             )

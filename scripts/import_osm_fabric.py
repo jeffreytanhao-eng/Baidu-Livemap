@@ -230,7 +230,6 @@ def _mark_residential_placeholders(col: FabricCollector) -> None:
 
     只保留占位面（覆盖率达标的大院无展示价值），原地改写 col.residential。
     """
-    import shapely
     from shapely import STRtree
 
     if not col.residential:

@@ -161,9 +161,16 @@ def test_misc_endpoints(client, sample_center_bd):
     assert health["graph"]["edges"] > 0
 
     samples = client.get("/api/v1/samples").json()
-    assert len(samples) == 5
+    assert len(samples) == 6
     ids = {s["id"] for s in samples}
-    assert ids == {"jinsong_15", "jinsong_5", "jinsong_20", "zhongguancun_15", "nanyuan_15"}
+    assert ids == {
+        "jinsong_15",
+        "jinsong_5",
+        "jinsong_20",
+        "zhongguancun_15",
+        "nanyuan_15",
+        "shangdi_15",
+    }
     for s in samples:
         assert {"id", "name", "center", "minutes"} <= set(s)
 
