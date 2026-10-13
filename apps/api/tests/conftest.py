@@ -15,6 +15,9 @@ sys.path.insert(0, str(API_DIR))
 os.environ["BAIDU_SERVER_AK"] = ""
 os.environ["DEMO_MODE"] = "false"
 os.environ["CACHE_DIR"] = tempfile.mkdtemp(prefix="livemap-cache-test-")
+# 测试 100% 走模板诊断，不依赖外部 LLM
+os.environ["LLM_API_KEY"] = ""
+os.environ["LLM_ENDPOINT"] = ""
 
 import pytest
 from app.config import load_settings
