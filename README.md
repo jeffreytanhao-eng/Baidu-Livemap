@@ -24,7 +24,7 @@
 **场景 B · 评估小区生活圈（`/evaluate`）**——「给这个小区的生活圈打分」
 
 1. 地图上选点即评估中心；点落在住宅小区（residential 面）内时自动匹配内置小区库，命中后在定位点右侧弹出**小区资讯框**：照片、售卖均价、一居/两居/三居租金区间、简介（右上角可关闭）；
-2. 支持 URL 参数 `?lat=&lng=&minutes=` 回填；样例中心（劲松/中关村/南苑 150 m 内）+ 默认 15 分钟**自动跑一次**，URL 指定坐标（如附近页跳转）也自动跑；
+2. 支持 URL 参数 `?lat=&lng=&minutes=` 回填；样例中心（劲松/中关村/南苑/上地 150 m 内）+ 默认 15 分钟**自动跑一次**，URL 指定坐标（如附近页跳转）也自动跑；
 3. 其余操作见 1.2。
 
 ### 1.2 评估场景操作流程
@@ -44,9 +44,23 @@
 ### 1.3 口径与规则
 
 - 等时分层随 X 变化：15 → 5/10/15 三层；其它取值 2–4 层且必含 X；覆盖达标阈值 = X 分钟，直线对照圆半径 = 80 m/min × X；
-- 七类设施：便利生活（≥3 个且最近 ≤ X）、娱乐休闲、商超购物、学习教育、医疗养老、公共空间、交通出行（一票制：地铁站 ≤ X 即达标，否则公交站 ≤ X 兜底达标）；
+- 七类设施：便利生活、娱乐休闲、商超购物、学习教育、医疗养老、公共空间、交通出行——定义与达标口径见 1.4；
 - 综合分公式：`0.40×覆盖7 + 0.20×锚点三项（便利生活/医疗养老/学习教育） + 0.15×(1 − 锚点最近均值/X) + 0.15×交通分量（地铁 1.0 / 仅公交 0.6 / 缺失 0） + 0.10×min(1, 等时圈面积/直线圆面积)`，分母恒为当前 X；
 - 白名单六城（北京/上海/杭州/成都/广州/深圳）完整体验；名单外照算，顶栏标「未做设施词表校准，仅验证方法」；境外坐标拒绝。
+
+### 1.4 七类生活设施定义
+
+| 类别 | 检索词（`$` = 或） | 达标口径 | 备注 |
+|---|---|---|---|
+| 便利生活 | 便利店 / 菜市场 / 农贸市场 / 理发店 / 快餐 / 蛋糕房 / 洗衣店 | ≥ 3 个且最近 ≤ X 分钟 | 综合分锚点三类之一 |
+| 娱乐休闲 | 电影院 / 剧院 / 体育馆 / 游泳馆 / 展览馆 / 健身 / 洗浴 / 按摩 / 温泉 / 度假村 | 最近 ≤ X 分钟 | 商业健身计入本类，不计入公共空间 |
+| 商超购物 | 购物中心 / 商场 / 超市 / 奥特莱斯 / 家居 | 最近 ≤ X 分钟 | 大型商超天然稀疏，覆盖权重已按此校准 |
+| 学习教育 | 小学 / 中学 / 大学 与 幼儿园（双检索、幼儿园分体配额，防止单查询合并时挤占配额） | 最近 ≤ X 分钟 | 综合分锚点三类之一；重点学校带「重点学校」徽标 |
+| 医疗养老 | 医院 / 社区卫生服务中心 / 诊所 / 药店 / 养老 / 敬老院 / 老年公寓 | 最近 ≤ X 分钟 | 综合分锚点三类之一；三甲医院带「三甲」徽标 |
+| 公共空间 | 公园 / 图书馆 / 公共绿地 / 广场 | 最近 ≤ X 分钟 | 按名称核心度分级保留（公园/花园/绿地/景区/广场优先）；剔除政务网点、商业广场（写字楼分栋/卖场/停车场）与商业健身；体育场馆归娱乐休闲；<400 m² 的绿地面（环岛/绿化带误标）不计入 |
+| 交通出行 | 地铁站 与 公交站（双检索，地铁优先保留） | 一票制：地铁站 ≤ X 即达标；否则公交站 ≤ X 兜底达标（注记「公交」） | 地铁站带「地铁」徽标；地铁出入口、冠名关联设施（酒店/停车场等）剔除 |
+
+通用规则：每类最多保留最近 20 个 POI；步行分钟优先取自与等时圈同源的图引擎耗时（POI 吸附路网节点），吸不上时按「直线距离 / 70 m/min」估算并标 `estimated`；第三拍 RouteMatrix 实测校准自动跳过「边缘到达」点（面状设施标签在内部，实测走到内部点位口径天然偏大）。
 
 启动与部署见「五、部署方法」。
 
@@ -63,7 +77,7 @@
 
 「步行 15 分钟能到哪」的真实答案受三重约束：住宅楼穿不过、未架桥的河过不去、无步道快速路上不去。本项目把这三种约束显式建模成图论问题：
 
-- **底图四层**：可步行路网（roads）、建筑面（buildings）、水域（water）、硬阻隔（barriers，快速路/铁路/封闭汽车道），全部来自真实 OpenStreetMap 裁片；
+- **底图六层**：可步行路网（roads）、建筑面（buildings）、住宅面（residential，小区匹配）、水域（water）、绿地（green，面设施「边缘到达」）、硬阻隔（barriers，快速路/铁路/封闭汽车道），全部来自真实 OpenStreetMap 裁片；
 - **建图规则**：与墙厚区或水域相交的边直接删除（天桥、人行地道除外）；阻隔线两侧的边不得跨越；建筑不是障碍而是「可进入性」问题（见下一条）；
 - **建筑可进入性四类判定**：商场可穿行（1.1× 步速走大厅/底商廊道）、办公只走底商 8 m 廊道、住宅不可穿（外扩 1.5 m 墙厚）、开放场地按内部路网走。
 
@@ -107,7 +121,7 @@ apps/web    Next.js 15 + TS + Tailwind + shadcn/ui + ECharts
 apps/api    FastAPI BFF：编排、两拍出圈、缓存、百度代理、降级、
             SQLite 小区库查询（community/locate、community/nearby）
 packages/geo 地理计算引擎包：底图加载/可进入性/建图/等时圈/打分/盲区/扇区
-data        map_fabric 预切四层底图 + SQLite 小区库 + 演示快照
+data        map_fabric 预切六层底图 + SQLite 小区库 + 演示快照
 ```
 
 ### 2. 北京六环内：真实 OSM 全量网格片（高精度）
@@ -116,9 +130,9 @@ data        map_fabric 预切四层底图 + SQLite 小区库 + 演示快照
 
 ```
 data/beijing-260927.osm.pbf（Geofabrik 北京抽取）
-  → scripts/import_osm_fabric.py --ring6     # PBF → 六环全量四层 GeoJSON
+  → scripts/import_osm_fabric.py --ring6     # PBF → 六环全量六层 GeoJSON
   → scripts/tile_fabric.py --source ...      # 全量 → 4km 网格片（bbox 外扩 2200m 邻域）
-  → data/map_fabric/b6r_rXXcYY/              # 每片 roads/buildings/water/barriers 四层 GeoJSON
+  → data/map_fabric/b6r_rXXcYY/              # 每片 roads/buildings/residential/water/green/barriers 六层 GeoJSON
 ```
 
 关键细节：
@@ -127,7 +141,7 @@ data/beijing-260927.osm.pbf（Geofabrik 北京抽取）
 - **按片名直取，不按点猜**：建图与底图接口均先算请求点所属网格片名（`tile_indices`），再对指定片裁切（`clip_region`），杜绝相邻片边界框重叠导致的错选；
 - **TileManager 懒加载 + LRU 常驻 8 片**：首次点入新片现场建图约 2–5 s，命中缓存 <300 ms；
 - **覆盖已验证**：ring6 边界多边形内均匀采样 11,167 点，逐点核对网格片，缺片 0 个；
-- 三个样例区域（劲松/中关村/南苑）另备**全量精修裁片**，启动即预热入内存，体验毫秒级。
+- 四个样例区域（劲松/中关村/南苑/上地）另备**全量精修裁片**，启动即预热入内存，体验毫秒级。
 
 ### 3. 六环外与名单外区域：走廊近似（自动降级）
 
@@ -135,7 +149,17 @@ data/beijing-260927.osm.pbf（Geofabrik 北京抽取）
 2. **POI 与耗时仍走百度实测**：设施检索与 RouteMatrix 算路与六环内同一套第三拍逻辑，缺口结论依然真实；
 3. **明确标注**：报告附「已降级」徽标，吸附说明注明「走廊近似」。
 
-### 4. 一次「开始体验」内部发生了什么
+### 4. 引擎关键实现
+
+- **图版本契约（graph_version，当前 v2）**：注入百度对照折线会新增节点/边，建图规则演进也会改变图结构——两者均以整数版本号显式声明；v2 起高速/快速路类阻隔不再整体切断步行图（行人在交叉口以高架/地道形式穿越）。节点级缓存键内嵌图版本，图一升级旧缓存整体失效，杜绝「旧 costs 配新图」的越界与脏数据；
+- **两级缓存**：进程内，截止 Dijkstra 的节点耗时（`node_costs`）与整份精拍结果（`node_results`）按 `(region, node_id, minutes, graph_version[, blindFilter])` 键缓存，同中心同分钟重复请求毫秒级返回；磁盘上，整响应 JSON 按「中心坐标（约 1 m 精度）+ minutes + engine」落盘，TTL 24 h，跨进程复用；
+- **启动期障碍预融合**：住宅墙厚区与水域在 RegionBundle 构建期一次性 `unary_union` 成单张障碍面，快/精拍直接 `difference`——真实 OSM 建筑动辄数千个墙厚区，逐请求求并是主要耗时，预融合后请求期零并集开销；
+- **百度能力幂等注入**：第三拍对照折线以 `region|route|geohash5` 为键登记在 `baidu_injected`，重复触发不二次注入；未配 AK 或百度超时只影响对照层与设施检索，前两拍等时圈结果不受影响；
+- **面属性回传复用**：绿地/水域面连同 OSM 属性（name/leisure 等）进入 RegionBundle，同时服务 POI 面感知「边缘到达」判定与公共设施名称回填（百度 place 对部分公园只有子设施 POI、无本体条目）；
+- **城市白名单**：六城（北京/上海/杭州/成都/广州/深圳）以内置 bbox 判定、零外部请求；境外坐标直接拒绝；名单外区域照算但顶栏标注「未做设施词表校准，仅验证方法」；
+- **SQLite 小区库**：`communities` 表 17 列（名称/归一化名/坐标/区县/商圈/售卖均价/一二三居租金区间/简介/综合分/打分时间），建 `name_norm` 与 `(lng, lat)` 双索引；定位接口两级命中（residential 面名精确匹配 → 500 m 坐标兜底），附近列表 haversine 全表扫描按距离升序。
+
+### 5. 一次「开始体验」内部发生了什么
 
 ```
 参数 → 中心吸附到最近可走节点（≤30 m；超出则提示「中心不在可走道路上，已吸附到最近可走点（约 X m）」）
@@ -145,61 +169,18 @@ data/beijing-260927.osm.pbf（Geofabrik 北京抽取）
      → 第三拍（不挡前两拍）：百度折线对照注入、POI 检索、RouteMatrix 校准
 ```
 
-### 5. API 摘要
+### 6. API 摘要
 
 | 接口 | 方法 | 说明 |
 |---|---|---|
 | `/api/v1/checkup` | POST | X 分钟生活圈体检主接口（`minutes` 校验 5–30，`phase=fast/full` 两拍） |
 | `/api/v1/fabric` | GET | 底图裁片（路网/建筑分色/水域/阻隔，BD09LL GeoJSON） |
-| `/api/v1/geocode` | POST | 地理编码（无 AK 时内置劲松/中关村/南苑映射） |
+| `/api/v1/geocode` | POST | 地理编码（无 AK 时内置劲松/中关村/南苑/上地映射） |
 | `/api/v1/reverse` | POST | 逆地理编码 |
 | `/api/v1/community/locate` | GET | 点击定位小区：residential 面名精确匹配 → 500 m 内坐标兜底 → 未命中，供资讯框展示 |
 | `/api/v1/community/nearby` | GET | 附近小区列表（半径 100–5000 m，按距离升序，回传 BD09 坐标） |
 | `/api/v1/samples` | GET | 演示样例列表 |
 | `/health` | GET | 状态、版本、AK/演示模式、图规模 |
-
-### 6. 目录结构
-
-```
-apps/
-  api/            FastAPI BFF（见上）
-    app/          main/checkup/coverage/community/db/engine/baidu/cache/llm...
-    tests/
-  web/            Next.js 15 前端（见上）
-    e2e/          Playwright 冒烟测试（不进 CI）
-packages/
-  geo/            地理计算引擎包
-    tests/
-data/
-  map_fabric/     预裁底图包（四层 GeoJSON：roads/buildings/water/barriers）
-    jinsong/        劲松：真实 OSM 精修裁片（939 路网 / 2303 建筑 / 4 水域 / 253 阻隔）
-    zhongguancun/   中关村：真实 OSM 精修裁片（2886 / 2615 / 29 / 30）
-    nanyuan/        南苑：真实 OSM 精修裁片（387 / 358 / 7 / 97）
-    b6r_rXXcYY/     六环 4km 全量网格片（生成物，不进 Git，合计 ~300MB）
-    *_synth/        劲松/中关村/南苑结构合成包（引擎回归测试与对照）
-  samples/        5 份演示快照 JSON（劲松 5/15/20、中关村 15、南苑 15）
-  livemap.db      SQLite 小区库（名称/坐标/售卖均价/租金区间/简介/照片索引）
-  uploads/communities/  小区照片（资讯框展示）
-  hot_facilities.json   热门设施词表（达标明细悬停提示）
-  *.osm.pbf       Geofabrik 原始 OSM 抽取（北京 35 MB 等），仅用于离线重切底图，不进 Git
-scripts/
-  dev.ps1 dev.sh          本地一键启动
-  import_osm_fabric.py    真实 OSM 底图管线：PBF → 四层 GeoJSON（pyosmium，单处理器双扫）
-  tile_fabric.py          全量底图 → 4km 邻域 pad 网格片（water/barriers 按片裁剪）
-  import_hot_facilities.py  热门设施词表导入
-  build_map_fabric.py     结构合成底图包生成
-  build_sample.py         快照离线生成
-  build_demo_routes.py    演示步行折线预生成
-  compare_report.py       对比报告取数（docs/comparison-report.md 的来源）
-docs/
-  algorithm.md         引擎算法说明（技术深度）
-  comparison-report.md 约束底图 vs 直线圆对比报告（真实计算数字）
-  demo-script.md       3 分钟路演口播稿
-  screenshots/         路演截图
-.env.example           服务端环境变量样例（复制为 .env；AK 不进 Git）
-apps/web/.env.example  前端环境变量样例（复制为 apps/web/.env.local；AK 不进 Git）
-.github/workflows/ci.yml
-```
 
 ## 五、部署方法
 
@@ -255,7 +236,7 @@ docker compose up --build
 
 ### 5. 底图数据重建
 
-见「系统技术架构 · 2」的管线命令；三个样例精修裁片由 `import_osm_fabric.py --bbox` 切出（劲松 `--bbox 116.436,39.868,116.480,39.901`，中关村/南苑见脚本内同名参数）。
+见「系统技术架构 · 2」的管线命令；四个样例精修裁片由 `import_osm_fabric.py --bbox` 切出（劲松 `--bbox 116.436,39.868,116.480,39.901`，上地 `--bbox 116.290,40.024,116.334,40.068`，中关村/南苑见脚本内同名参数）。
 
 ## 六、其它与开源协议
 
@@ -280,4 +261,4 @@ npx playwright test
 
 - **代码**：MIT（见 [LICENSE](LICENSE)）；
 - **地图展示与 POI、步行算路数据**：版权归**百度**所有；
-- **底图数据（OSM 裁片）**：`data/map_fabric/{jinsong,zhongguancun,nanyuan}/` 均为**真实 OpenStreetMap 裁片**（ODbL，© [OpenStreetMap](https://www.openstreetmap.org/) contributors），由 `data/beijing-260927.osm.pbf` 经 `scripts/import_osm_fabric.py` 切出；`*_synth/` 为结构合成的演示数据（字段与标签体系同 OSM 裁切一致，供回归测试与对照）。再分发或再次裁切时请保留 ODbL 署名。
+- **底图数据（OSM 裁片）**：`data/map_fabric/{jinsong,zhongguancun,nanyuan,shangdi}/` 均为**真实 OpenStreetMap 裁片**（ODbL，© [OpenStreetMap](https://www.openstreetmap.org/) contributors），由 `data/beijing-260927.osm.pbf` 经 `scripts/import_osm_fabric.py` 切出；`*_synth/` 为结构合成的演示数据（字段与标签体系同 OSM 裁切一致，供回归测试与对照）。再分发或再次裁切时请保留 ODbL 署名。
