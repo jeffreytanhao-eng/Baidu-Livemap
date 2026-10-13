@@ -409,6 +409,10 @@ def test_transport_base_name_variants():
     assert _transport_base_name("九龙山地铁站") == "九龙山"
     assert _transport_base_name("珠江帝景(公交站)") == "珠江帝景"
     assert _transport_base_name("地铁上地站") == "上地"
+    # 站台方向后缀：同一站台两侧（东行/西行）归并
+    assert _transport_base_name("地铁上地软件园站(西行)") == "上地软件园"
+    assert _transport_base_name("地铁上地软件园站(东行)") == "上地软件园"
+    assert _transport_base_name("马连洼站（北行）") == "马连洼"
     # 站名本身以「地铁站」结尾（无后缀）不误伤
     assert _transport_base_name("天通苑北地铁站") == "天通苑北"
 

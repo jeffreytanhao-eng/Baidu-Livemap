@@ -410,17 +410,21 @@ def calibrate_walk_minutes(
 _TRANSPORT_NAME_SUFFIX_RE = re.compile(r"[(（]?(?:地铁站|公交站|地铁|公交)[)）]?$")
 # 品牌前缀：「地铁马连洼站」→「马连洼站」
 _TRANSPORT_NAME_PREFIX_RE = re.compile(r"^地铁(?=.)")
+# 站台方向后缀：「地铁上地软件园站(西行)」/「(北行)」等→ 同一站台两侧，剥离后归并
+_TRANSPORT_NAME_SIDE_RE = re.compile(r"[(（](?:东行|西行|南行|北行|上行|下行)[)）]$")
 
 
 def _transport_base_name(name: str) -> str:
-    """规范化基础站名：剥「地铁站/公交站/（地铁）/（公交）」通名尾缀、「地铁」
-    品牌前缀与单「站」尾缀，用于同名站台归并。
+    """规范化基础站名：剥方向后缀「(东行)/(西行)」、「地铁站/公交站/（地铁）/（公交）」
+    通名尾缀、「地铁」品牌前缀与单「站」尾缀，用于同名站台归并。
 
     百度对同一车站常给出多种写法（如「马连洼（地铁）」与「地铁马连洼站
-    （地铁）」），实为同一站，不归一会双重计数。
+    （地铁）」；「地铁上地软件园站(西行)」与「(东行)」为同一站台两侧），
+    实为同一站，不归一会双重计数。
     """
     original = str(name or "").strip()
-    s = _TRANSPORT_NAME_SUFFIX_RE.sub("", original).strip()
+    s = _TRANSPORT_NAME_SIDE_RE.sub("", original).strip()
+    s = _TRANSPORT_NAME_SUFFIX_RE.sub("", s).strip()
     if not s:
         return original
     s = _TRANSPORT_NAME_PREFIX_RE.sub("", s).strip()
