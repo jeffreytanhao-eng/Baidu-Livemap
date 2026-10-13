@@ -443,6 +443,11 @@ export default function BaiduMapImpl(props: MapImplProps) {
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
+      // canvas 是 replaced element，inset-0 不会拉伸它：不显式设置 CSS 尺寸时，
+      // 浏览器把 width/height 属性值（物理像素）当 CSS 尺寸用——系统 125% 缩放
+      // 下整层被放大 25%，底图与自绘图层错位、点击可视元素反算出偏移坐标
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
     }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
