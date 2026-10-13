@@ -73,6 +73,7 @@ _BUILTIN_GEOCODE: dict[str, tuple[str, tuple[float, float]]] = {
     "劲松": ("劲松街道 · 北京", REGION_CENTERS["jinsong"]),
     "中关村": ("中关村 · 北京", REGION_CENTERS["zhongguancun"]),
     "南苑": ("南苑 · 北京", REGION_CENTERS["nanyuan"]),
+    "上地": ("上地 · 北京", REGION_CENTERS["shangdi"]),
 }
 
 
@@ -256,7 +257,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if keyword in query:
                 bd = wgs84_to_bd09ll(*wgs)
                 return {"lng": bd[0], "lat": bd[1], "address": address}
-        raise HTTPException(status_code=404, detail="未找到该地址（离线演示支持：劲松 / 中关村 / 南苑）")
+        raise HTTPException(status_code=404, detail="未找到该地址（离线演示支持：劲松 / 中关村 / 南苑 / 上地）")
 
     @app.post("/api/v1/reverse")
     async def reverse(body: ReverseRequest, request: Request):
