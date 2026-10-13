@@ -650,17 +650,10 @@ export default function BaiduMapImpl(props: MapImplProps) {
     ];
     events.forEach((ev) => map.addEventListener(ev, schedule));
 
-    map.addEventListener("click", (e: any) => {
-      const latlng = e?.latlng;
-      if (!latlng) return;
-      const hit = hitTestPoi({ lng: latlng.lng, lat: latlng.lat });
-      if (hit) {
-        setSelectedPoi(hit);
-        return;
-      }
-      setSelectedPoi(null);
-      propsRef.current.onCenterChange({ lng: latlng.lng, lat: latlng.lat });
-    });
+    // 点击选点不走 BMapGL 的 click 事件：真实 Windows 系统 DPI 缩放（如 125%）
+    // 下其 e.latlng 与视觉位置存在偏差（headless 模拟 deviceScaleFactor 无法
+    // 复现）。改为 DOM 层 pointer 事件 + 自建投影反算，与中心标记拖拽链路
+    // 同源（CSS 像素），与百度 GL 内部换算解耦，DPI 无关。见下方 handleMapTap。
 
     const ro = new ResizeObserver(() => drawRef.current());
     ro.observe(el);
@@ -774,6 +767,42 @@ export default function BaiduMapImpl(props: MapImplProps) {
     drawRef.current();
   };
 
+  // ---- 地图点击选点（DOM 反算，避开 BMapGL 在系统 DPI 缩放下的 latlng 偏差）----
+  const tapDownRef = useRef<{ x: number; y: number; id: number } | null>(null);
+  const lastTapRef = useRef(0);
+  const handleMapTap = (clientX: number, clientY: number) => {
+    const proj = projRef.current;
+    const canvas = canvasRef.current;
+    if (!proj || !canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const lng = proj.x0 + (clientX - rect.left) / proj.sx;
+    const lat = proj.y0 - (clientY - rect.top) / proj.sy;
+    const hit = hitTestPoi({ lng, lat });
+    if (hit) {
+      setSelectedPoi(hit);
+      return;
+    }
+    setSelectedPoi(null);
+    propsRef.current.onCenterChange({ lng, lat });
+  };
+  const onMapPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    tapDownRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  };
+  const onMapPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = tapDownRef.current;
+    tapDownRef.current = null;
+    if (!d || e.pointerId !== d.id) return;
+    // 图钉/弹窗等 UI 是 containerRef 的兄弟节点，pointerup 落在其上不处理；
+    // 位移超阈值视为拖拽平移；350ms 内二次释放视为双击缩放，均不选点
+    if (!containerRef.current?.contains(e.target as Element)) return;
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
+    const now = Date.now();
+    if (now - lastTapRef.current < 350) return;
+    lastTapRef.current = now;
+    handleMapTap(e.clientX, e.clientY);
+  };
+
   // ---- fit viewport ----
   useEffect(() => {
     const B = window.BMapGL;
@@ -801,7 +830,12 @@ export default function BaiduMapImpl(props: MapImplProps) {
   const poiMeta = selectedPoi ? POI_CATEGORY_META[selectedPoi.category] : null;
 
   return (
-    <div className="relative h-full w-full">
+    <div
+      className="relative h-full w-full"
+      onPointerDown={onMapPointerDown}
+      onPointerUp={onMapPointerUp}
+      onPointerCancel={() => (tapDownRef.current = null)}
+    >
       <div ref={containerRef} className="h-full w-full" />
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0" />
       {/* 中心标记的透明命中区（视觉已在 canvas 上，这里只处理拖拽） */}
