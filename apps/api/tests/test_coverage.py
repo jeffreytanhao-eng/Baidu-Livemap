@@ -440,6 +440,30 @@ def test_select_within_health_branch_merge():
     assert all(p["_withinTotal"] == 3 for p in out if p["category"] == "health")
 
 
+def test_select_within_public_park_entrance_merge():
+    """public：同名公园多入口归并（如 4 条「百旺公园」），三期/西区等分区保留。"""
+    views = [
+        # 百旺公园 4 个门/入口 POI（名称完全相同）→ 只留最近
+        {**_view("public", 4.2), "id": "p-4", "name": "百旺公园"},
+        {**_view("public", 4.9), "id": "p-5", "name": "百旺公园"},
+        {**_view("public", 8.1), "id": "p-8", "name": "百旺公园"},
+        {**_view("public", 8.1), "id": "p-9", "name": "百旺公园"},
+        # 分区名不同 → 保留（用户口径：单独出现是正确的）
+        {**_view("public", 0.4), "id": "p-3rd", "name": "百旺公园三期"},
+        # 连字符写法变体「-西区」/「西区」→ 归一到同一分区，只留一条
+        {**_view("public", 11.6), "id": "p-west1", "name": "百旺公园-西区"},
+        {**_view("public", 11.6), "id": "p-west2", "name": "百旺公园西区"},
+        # 其他公园不受影响
+        {**_view("public", 8.8), "id": "p-herb", "name": "药用植物园"},
+    ]
+    out = select_within_pois(views, 15)
+    order = [p["id"] for p in out if p["category"] == "public"]
+    # 核心词（公园等）优先按步行分钟升序，非核心（药用植物园）排尾；
+    # 同名 4 条归并、连字符变体归并
+    assert order == ["p-3rd", "p-4", "p-west1", "p-herb"]
+    assert all(p["_withinTotal"] == 4 for p in out if p["category"] == "public")
+
+
 def test_select_within_transport_metro_priority_in_cap():
     """transport 超 cap 时地铁站优先保留，公交站被挤掉。"""
     views = []

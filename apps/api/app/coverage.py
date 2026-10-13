@@ -433,6 +433,19 @@ def _transport_base_name(name: str) -> str:
     return s or original
 
 
+# 公共空间名称分隔符：「百旺公园-西区」「百旺公园·北区」等写法归一到「百旺公园西区」
+_PUBLIC_NAME_SEP_RE = re.compile(r"[-－—–·•\s]+")
+
+
+def _public_base_name(name: str) -> str:
+    """规范化公共空间名称：去连字符/间隔号/空白，用于同名公园多入口归并。
+
+    百度对大公园常返回多个门/入口 POI，名称完全相同（如 4 条「百旺公园」），
+    不归一会重复计数；「百旺公园三期」「百旺公园西区」是不同分区，保留。
+    """
+    return _PUBLIC_NAME_SEP_RE.sub("", str(name or "").strip())
+
+
 # health 同院区科室尾缀：「孙河社区卫生服务中心-驾驶人体检室」「XX医院-发热门诊」
 # → 主机构名「孙河社区卫生服务中心」「XX医院」（半角连字符；全角/长破折号兼容）
 _HEALTH_BRANCH_RE = re.compile(r"[-－—–].*$")
@@ -482,7 +495,8 @@ def select_within_pois(
     - ``health`` 同院区科室归并：剥「-科室」后缀的主机构名相同且相距
       ≤200m 视为同一设施（多科室/体检点只计最近一处，如孙河社区卫生服务
       中心的驾驶人体检室/狂犬疫苗/发热门诊），不同院区相距远不误伤；
-    - ``public`` 公园/绿地/广场核心类优先保留（超 cap 不被图书馆挤掉）。
+    - ``public`` 同名公园归并：去连字符/空白后名称相同视为同一公园多入口，
+      只留最近一处（三期/西区等分区保留）；核心类优先保留（超 cap 不被图书馆挤掉）。
     """
     out: list[dict[str, Any]] = []
     for cat in CATEGORIES:
@@ -512,6 +526,18 @@ def select_within_pois(
                 ):
                     continue
                 anchors.append((base, lng, lat))
+                merged.append(p)
+            items = merged
+        elif cat == "public":
+            # 同名公园/绿地归并：规范化名称相同视为同一公园的多个门/入口，
+            # 只留最近一处（如 4 条「百旺公园」）；「三期/西区」等分区名不同，保留
+            merged = []
+            seen_names: set[str] = set()
+            for p in sorted(items, key=_within_sort_key):
+                base = _public_base_name(str(p.get("name") or ""))
+                if base in seen_names:
+                    continue
+                seen_names.add(base)
                 merged.append(p)
             items = merged
         within_total = len(items)
