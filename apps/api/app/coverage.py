@@ -405,13 +405,28 @@ def calibrate_walk_minutes(
 
 # ---- 圈内选取（步行分钟定稿后，attach + calibrate 之后调用） ----
 
-# 站名通名尾缀：「九龙山地铁站」「珠江帝景(公交站)」→ 基础站名「九龙山」「珠江帝景」
-_TRANSPORT_NAME_SUFFIX_RE = re.compile(r"[(（]?(?:地铁站|公交站)[)（]?$")
+# 站名通名尾缀：「九龙山地铁站」「珠江帝景(公交站)」「马连洼（地铁）」
+# → 基础站名「九龙山」「珠江帝景」「马连洼」
+_TRANSPORT_NAME_SUFFIX_RE = re.compile(r"[(（]?(?:地铁站|公交站|地铁|公交)[)）]?$")
+# 品牌前缀：「地铁马连洼站」→「马连洼站」
+_TRANSPORT_NAME_PREFIX_RE = re.compile(r"^地铁(?=.)")
 
 
 def _transport_base_name(name: str) -> str:
-    """规范化基础站名：剥离「地铁站/公交站」通名尾缀，用于同名站台归并。"""
-    return _TRANSPORT_NAME_SUFFIX_RE.sub("", str(name or "").strip())
+    """规范化基础站名：剥「地铁站/公交站/（地铁）/（公交）」通名尾缀、「地铁」
+    品牌前缀与单「站」尾缀，用于同名站台归并。
+
+    百度对同一车站常给出多种写法（如「马连洼（地铁）」与「地铁马连洼站
+    （地铁）」），实为同一站，不归一会双重计数。
+    """
+    original = str(name or "").strip()
+    s = _TRANSPORT_NAME_SUFFIX_RE.sub("", original).strip()
+    if not s:
+        return original
+    s = _TRANSPORT_NAME_PREFIX_RE.sub("", s).strip()
+    if s.endswith("站"):
+        s = s[:-1].strip()
+    return s or original
 
 
 # health 同院区科室尾缀：「孙河社区卫生服务中心-驾驶人体检室」「XX医院-发热门诊」

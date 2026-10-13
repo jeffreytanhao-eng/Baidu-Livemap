@@ -388,12 +388,29 @@ def test_select_within_transport_merge_and_metro_priority():
         {**_view("transport", 8.2), "id": "jls", "name": "九龙山地铁站", "transportKind": "metro"},
         # 通名尾缀不同的同名站视为同一站：「九龙山（地铁）」与「九龙山地铁站」
         {**_view("transport", 9.3), "id": "jls2", "name": "九龙山", "transportKind": "metro"},
+        # 百度对同一车站的多种写法：「马连洼（地铁）」与「地铁马连洼站（地铁）」
+        {**_view("transport", 5.5), "id": "mlw1", "name": "马连洼（地铁）", "transportKind": "metro"},
+        {**_view("transport", 6.4), "id": "mlw2", "name": "地铁马连洼站（地铁）", "transportKind": "metro"},
         {**_view("transport", 6.7), "id": "b1", "name": "九龙山路口西", "transportKind": "bus"},
     ]
     out = select_within_pois(views, 15)
     order = [p["id"] for p in out if p["category"] == "transport"]
-    assert order == ["jls", "zj1", "b1"]  # 地铁优先；珠江帝景/九龙山各只留最近一处
-    assert all(p["_withinTotal"] == 3 for p in out if p["category"] == "transport")
+    # 地铁优先；珠江帝景/九龙山/马连洼各只留最近一处
+    assert order == ["mlw1", "jls", "zj1", "b1"]
+    assert all(p["_withinTotal"] == 4 for p in out if p["category"] == "transport")
+
+
+def test_transport_base_name_variants():
+    """transport：百度同一车站的多种写法归一到同一基础站名。"""
+    from app.coverage import _transport_base_name
+
+    assert _transport_base_name("马连洼（地铁）") == "马连洼"
+    assert _transport_base_name("地铁马连洼站（地铁）") == "马连洼"
+    assert _transport_base_name("九龙山地铁站") == "九龙山"
+    assert _transport_base_name("珠江帝景(公交站)") == "珠江帝景"
+    assert _transport_base_name("地铁上地站") == "上地"
+    # 站名本身以「地铁站」结尾（无后缀）不误伤
+    assert _transport_base_name("天通苑北地铁站") == "天通苑北"
 
 
 def test_select_within_health_branch_merge():
