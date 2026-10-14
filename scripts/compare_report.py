@@ -160,7 +160,6 @@ async def main() -> None:
             center_wgs=center,
             minutes=minutes,
             engine="map-fabric",
-            include_blind_walk=True,
             phase="full",
             allow_snapshot=False,
         )
