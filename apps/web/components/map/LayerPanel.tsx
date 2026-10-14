@@ -157,6 +157,19 @@ export default function LayerPanel({
           )}
         </div>
       )}
+
+      <div className="mt-3 border-t border-slate-100 pt-2 text-[10px] leading-4 text-slate-400">
+        路网 / 建筑 / 水域图层基于{" "}
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-slate-600"
+        >
+          © OpenStreetMap contributors
+        </a>{" "}
+        (ODbL)
+      </div>
     </div>
   );
 }
