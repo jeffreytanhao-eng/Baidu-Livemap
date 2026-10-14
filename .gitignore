@@ -43,5 +43,9 @@ Thumbs.db
 # logs
 *.log
 logs/
-# 本地过程文档（不进 Git）
-.trae/documents/
+# 本地比赛材料与过程文档（不进 Git，仅保留本地）
+.trae/
+/ai_15_nIsJ99EN3y.pdf
+/生活圈智能体验助手_Phase0_开发规格说明书_v1.2.md
+/生活圈智能体验助手_Phase0_开发计划书_v1.2.md
+/百度配额升级申请.md
